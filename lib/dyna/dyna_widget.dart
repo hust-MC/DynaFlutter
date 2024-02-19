@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:dyna_flutter/dyna/param_utils.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'widget_map.dart';
@@ -14,19 +15,23 @@ class DynaWidget extends StatefulWidget {
 }
 
 class DynaState extends State<DynaWidget> {
+  Widget? _child;
+
   @override
   Widget build(BuildContext context) {
     print("MCLOG ==== build");
-    return Text("CMMCMC]");
+    return _child ?? Text("Default");
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _resolveResource();
+    _resolveResource().then((value) {
+      setState(() => {_child = value});
+    });
   }
 
-  Future<void> _resolveResource() async {
+  Future<Widget?> _resolveResource() async {
     String source = await rootBundle.loadString(widget.src);
     print("MCLOG ==== source: $source");
     var widgetTree = json.decode(source);
@@ -38,7 +43,10 @@ class DynaState extends State<DynaWidget> {
       var np = widgetJson['nameParam'];
       var widgetBlock = widgetMap[name];
       print("MCLOG ==== widgetBlock: $widgetBlock");
-
+      var params = ParamUtils.transform(pp, np);
+      print("MCLOG ==== params: $params");
+      return widgetBlock!(params);
     }
+    return null;
   }
 }
