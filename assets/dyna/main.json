@@ -1,6 +1,54 @@
 {
   "widget": {
-    "name": "Text",
-    "posParam": "Flutter Demo"
+    "name": "Scaffold",
+    "nameParam": {
+      "appBar": {
+        "widget": {
+          "name": "AppBar",
+          "nameParam": {
+            "title": {
+              "widget": {
+                "name": "Text",
+                "posParam": [
+                  "MCMC"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "body": {
+        "widget": {
+          "name": "Center",
+          "nameParam": {
+            "child": {
+              "widget": {
+                "name": "Column",
+                "nameParam": {
+                  "children": [
+                    {
+                      "widget": {
+                        "name": "Text",
+                        "posParam": [
+                          "Text1"
+                        ]
+                      }
+                    },
+                    {
+                      "widget": {
+                        "name": "Text",
+                        "posParam": [
+                          "Text211"
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }

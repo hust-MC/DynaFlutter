@@ -36,17 +36,63 @@ class DynaState extends State<DynaWidget> {
     print("MCLOG ==== source: $source");
     var widgetTree = json.decode(source);
     print("MCLOG ==== widgetTree: $widgetTree");
-    var widgetJson = widgetTree['widget'];
-    if (widgetJson is Map) {
-      var name = widgetJson['name'];
-      var pp = widgetJson['posParam'];
-      var np = widgetJson['nameParam'];
-      var widgetBlock = widgetMap[name];
-      print("MCLOG ==== widgetBlock: $widgetBlock");
-      var params = ParamUtils.transform(pp, np);
-      print("MCLOG ==== params: $params");
-      return widgetBlock!(params);
+    return _resolveWidget(widgetTree);
+  }
+
+  Widget _resolveWidget(Map source) {
+    print("MCLOG ==== source: $source");
+    if (source == null || source.isEmpty) {
+      return Container();
     }
-    return null;
+    var root = source['widget'];
+    assert(root != null);
+
+    var name = root['name'];
+    var pp = _resolvePosParams(root['posParam']);
+    var np = _resolveNameParams(root['nameParam']);
+    var widgetBlock = widgetMap[name];
+    print("MCLOG ==== widgetBlock: $widgetBlock; pp: $pp; np: $np; name: $name");
+    var params = ParamUtils.transform(pp, np);
+    print("MCLOG ==== params: $params");
+    return widgetBlock!(params);
+  }
+
+  List _resolvePosParams(dynamic params) {
+    final posParams = [];
+    if (params is List) {
+      params.forEach((element) {
+        if (element is Map) {
+          posParams.add(_resolveWidget(element));
+        } else {
+          posParams.add(element);
+        }
+      });
+    }
+    return posParams;
+  }
+
+  Map<String, dynamic> _resolveNameParams(dynamic params) {
+    Map<String, dynamic> nameParams = {};
+
+    if (params is Map) {
+      final children = [];
+      params.forEach((key, child) {
+        if (child is List) {
+          for (var element in child) {
+            children.add(_resolveWidget(element));
+          }
+          nameParams[key] = children;
+        } else if (child is Map) {
+          nameParams[key] = _resolveWidget(child);
+        } else {
+          nameParams[key] = child;
+        }
+      });
+    }
+    return nameParams;
+  }
+
+  bool _isWidget(Map widget) {
+    return widget.containsKey('widget');
   }
 }
