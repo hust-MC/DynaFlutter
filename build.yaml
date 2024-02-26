@@ -1,0 +1,7 @@
+builders:
+  dyna:
+    import: "package:dyna_flutter/dyna_builder/dsl_builder.dart"
+    builder_factories: [ "dynaDsl" ]
+    build_extensions: { '.dart': [ '.dyna.json' ] }
+    build_to: cache
+    auto_apply: root_package

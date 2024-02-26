@@ -1,45 +1,47 @@
 {
-  "widget": {
-    "name": "Scaffold",
-    "nameParam": {
+  "widget": "Scaffold",
+  "params": {
+    "name": {
       "appBar": {
-        "widget": {
-          "name": "AppBar",
-          "nameParam": {
+        "widget": "AppBar",
+        "params": {
+          "name": {
             "title": {
-              "widget": {
-                "name": "Text",
-                "posParam": [
-                  "MCMC"
-                ]
+              "widget": "Text",
+              "params": {
+                "pos": "Flutter 动态化课程"
               }
             }
           }
         }
       },
       "body": {
-        "widget": {
-          "name": "Center",
-          "nameParam": {
+        "widget": "Center",
+        "params": {
+          "pos": [],
+          "name": {
             "child": {
-              "widget": {
-                "name": "Column",
-                "nameParam": {
+              "widget": "Column",
+              "params": {
+                "name": {
+                  "mainAxisAlignment": "MainAxisAlignment.center",
                   "children": [
                     {
-                      "widget": {
-                        "name": "Text",
-                        "posParam": [
-                          "Text1"
-                        ]
+                      "widget": "Text",
+                      "params": {
+                        "pos": [
+                          "You have pushed the button this many times:"
+                        ],
+                        "name": {}
                       }
                     },
                     {
-                      "widget": {
-                        "name": "Text",
-                        "posParam": [
-                          "Text211"
-                        ]
+                      "widget": "Text",
+                      "posParams": [
+                        "Count"
+                      ],
+                      "nameParams": {
+                        "style": "Theme.of(context).textTheme.headline4"
                       }
                     }
                   ]
@@ -48,6 +50,8 @@
             }
           }
         }
+      },
+      "floatingActionButton": {
       }
     }
   }

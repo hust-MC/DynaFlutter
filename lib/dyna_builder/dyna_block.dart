@@ -1,0 +1,3 @@
+class DynaBlock {
+  const DynaBlock();
+}
