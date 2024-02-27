@@ -41,15 +41,14 @@ class DynaState extends State<DynaWidget> {
 
   Widget _resolveWidget(Map source) {
     print("MCLOG ==== source: $source");
-    if (source == null || source.isEmpty) {
-      return Container();
+    if (source.isEmpty) {
+      return Text('Error');
     }
-    var root = source['widget'];
-    assert(root != null);
 
-    var name = root['name'];
-    var pp = _resolvePosParams(root['posParam']);
-    var np = _resolveNameParams(root['nameParam']);
+    var name = source['widget'];
+    var paramsMap = source['params'];
+    var pp = _resolvePosParams(paramsMap['pos']);
+    var np = _resolveNameParams(paramsMap['name']);
     var widgetBlock = widgetMap[name];
     print("MCLOG ==== widgetBlock: $widgetBlock; pp: $pp; np: $np; name: $name");
     var params = ParamUtils.transform(pp, np);

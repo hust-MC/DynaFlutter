@@ -9,7 +9,9 @@
             "title": {
               "widget": "Text",
               "params": {
-                "pos": "Flutter 动态化课程"
+                "pos": [
+                  "Flutter 动态化课程"
+                ]
               }
             }
           }
@@ -18,7 +20,6 @@
       "body": {
         "widget": "Center",
         "params": {
-          "pos": [],
           "name": {
             "child": {
               "widget": "Column",
@@ -31,17 +32,18 @@
                       "params": {
                         "pos": [
                           "You have pushed the button this many times:"
-                        ],
-                        "name": {}
+                        ]
                       }
                     },
                     {
                       "widget": "Text",
-                      "posParams": [
-                        "Count"
-                      ],
-                      "nameParams": {
-                        "style": "Theme.of(context).textTheme.headline4"
+                      "params": {
+                        "pos": [
+                          "Count"
+                        ],
+                        "name": {
+                          "style": "Theme.of(context).textTheme.headline4"
+                        }
                       }
                     }
                   ]
@@ -50,8 +52,6 @@
             }
           }
         }
-      },
-      "floatingActionButton": {
       }
     }
   }
