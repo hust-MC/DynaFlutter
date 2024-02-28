@@ -1,11 +1,10 @@
-class ParamUtils {
-  static Map<String, dynamic> transform(List<dynamic>? list, Map<String, dynamic>? map) {
-    final result = <String, dynamic>{};
+import 'widget_map.dart';
 
-    result['posParam'] = list;
-    map?.forEach((key, value) {
-      result[key] = value;
-    });
+class ParamUtils {
+  static Params transform(List<dynamic>? pos, Map<String, dynamic>? name) {
+    final result = Params();
+    result.posParam = pos ?? result.posParam;
+    result.nameParam = name ?? result.nameParam;
     return result;
   }
 
