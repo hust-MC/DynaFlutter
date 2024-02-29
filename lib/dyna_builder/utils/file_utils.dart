@@ -4,5 +4,6 @@ import 'package:path/path.dart';
 final String rootDir = join('.dart_tool', 'build', 'dyna');
 
 Future<File> getTempFile() {
-  return File(join(rootDir, DateTime.now().toString())).create(recursive: true);
+  var timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+  return File(join(rootDir, timestamp)).create(recursive: true);
 }
