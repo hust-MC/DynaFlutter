@@ -23,7 +23,7 @@ class DslGenerator extends GeneratorForAnnotation<DynaBlock> {
 
     // 创建临时文件，存储需要转化的Dart文件
     final temp = await getTempFile();
-    print('[dynaFlutter] Create timp file：${temp.absolute}');
+    print('[dynaFlutter] Create temp file：${temp.absolute}');
 
     temp.writeAsBytesSync(await buildStep.readAsBytes(buildStep.inputId));
     var compilationUnit =
