@@ -29,6 +29,10 @@ class DslGenerator extends GeneratorForAnnotation<DynaBlock> {
     var compilationUnit =
         parseFile(path: temp.path, featureSet: FeatureSet.fromEnableFlags([])).unit;
     var ast = compilationUnit.accept(AstVisitor());
+    var encoder = const JsonEncoder.withIndent('  ');
+
+    var astString = encoder.convert(ast);
+    print('MCLOG====[dynaFlutter] ast：$astString');
 
     var rootExpression = Expression.fromAst(ast);
     var bodyList = rootExpression!.asProgram.body;

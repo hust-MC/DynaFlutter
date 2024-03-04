@@ -48,7 +48,6 @@ enum AstNodeName {
   ExpressionStatement,
   IndexExpression,
   StringInterpolation,
-  InterpolationExpression,
   VariableExpression,
   Program
 }
@@ -972,42 +971,17 @@ class IndexExpression extends AstNode {
   Map? toAst() => _ast;
 }
 
-class InterpolationExpression extends AstNode {
-  String? name;
-
-  InterpolationExpression(this.name, {Map? ast}) : super(ast: ast);
-
-  static InterpolationExpression? fromAst(Map? ast) {
-    if (ast != null &&
-        ast['type'] == astNodeNameValue(AstNodeName.InterpolationExpression)) {
-      var n = Identifier.fromAst(ast['expression']);
-      if (n != null) {
-        return InterpolationExpression(n.name, ast: ast);
-      }
-    }
-    return null;
-  }
-
-  @override
-  Map? toAst() => _ast;
-}
-
 class StringInterpolation extends AstNode {
   List<Expression?>? elements;
   String? sourceString;
 
-  StringInterpolation(this.elements, this.sourceString, {Map? ast})
+  StringInterpolation(this.sourceString, {Map? ast})
       : super(ast: ast);
 
   static StringInterpolation? fromAst(Map? ast) {
     if (ast != null &&
         ast['type'] == astNodeNameValue(AstNodeName.StringInterpolation)) {
-      var elements = <Expression?>[];
-      var list = ast['elements'] as List?;
-      list?.forEach((s) {
-        elements.add(Expression.fromAst(s));
-      });
-      return StringInterpolation(elements, ast['sourceString'], ast: ast);
+      return StringInterpolation(ast['sourceString'], ast: ast);
     }
     return null;
   }
@@ -1092,7 +1066,6 @@ class Expression extends AstNode {
   bool? isSwitchStatement;
   bool? isIndexExpression;
   bool? isStringInterpolation;
-  bool? isInterpolationExpression;
   bool? isVariableDeclaration;
   bool? isVariableExpression;
   bool? isFuncParam;
@@ -1132,7 +1105,6 @@ class Expression extends AstNode {
     this.isSwitchStatement = false,
     this.isIndexExpression = false,
     this.isStringInterpolation = false,
-    this.isInterpolationExpression = false,
     this.isVariableDeclaration = false,
     this.isVariableExpression = false,
     this.isFuncParam =false,
@@ -1230,10 +1202,6 @@ class Expression extends AstNode {
     } else if (astType == astNodeNameValue(AstNodeName.StringInterpolation)) {
       return Expression(StringInterpolation.fromAst(ast),
           isStringInterpolation: true, ast: ast);
-    } else if (astType ==
-        astNodeNameValue(AstNodeName.InterpolationExpression)) {
-      return Expression(InterpolationExpression.fromAst(ast),
-          isInterpolationExpression: true, ast: ast);
     } else if (astType == astNodeNameValue(AstNodeName.VariableExpression)) {
       return Expression(VariableExpression.fromAst(ast), isVariableExpression: true, ast: ast);
     }
@@ -1305,9 +1273,6 @@ class Expression extends AstNode {
 
   StringInterpolation get asStringInterpolation =>
       _expression as StringInterpolation;
-
-  InterpolationExpression get asInterpolationExpression =>
-      _expression as InterpolationExpression;
 
   VariableExpression get asVariableExpression => _expression as VariableExpression;
 }

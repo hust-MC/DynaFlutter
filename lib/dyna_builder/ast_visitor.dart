@@ -19,7 +19,10 @@ class AstVisitor extends SimpleAstVisitor<Map> {
 
   @override
   Map? visitAnnotation(Annotation node) {
-    return _buildAnnotation(node.name.accept(this), node.arguments?.accept(this));
+    var name = node.name.accept(this);
+    var argumentList = node.arguments?.accept(this);
+
+    return {'type': 'Annotation', 'id': name, 'argumentList': argumentList};
   }
 
   @override
@@ -29,17 +32,8 @@ class AstVisitor extends SimpleAstVisitor<Map> {
   }
 
   @override
-  Map? visitInterpolationExpression(InterpolationExpression node) {
-    return {'type': 'InterpolationExpression', 'id': node.expression.accept(this)};
-  }
-
-  @override
   Map? visitStringInterpolation(StringInterpolation node) {
-    return {
-      'type': 'StringInterpolation',
-      'elements': accept(node.elements, this),
-      'sourceString': node.toSource()
-    };
+    return {'type': 'StringInterpolation', 'sourceString': node.toSource()};
   }
 
   @override
@@ -69,6 +63,7 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     };
   }
 
+  ///根节点
   @override
   Map? visitCompilationUnit(CompilationUnit node) {
     var body = accept(node.declarations, this);
@@ -84,7 +79,8 @@ class AstVisitor extends SimpleAstVisitor<Map> {
 
   @override
   Map? visitBlock(Block node) {
-    return _buildBloc(accept(node.statements, this));
+    var body = accept(node.statements, this);
+    return {'type': 'BlockStatement', 'body': [body]};
   }
 
   @override
@@ -92,9 +88,16 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     return node.block.accept(this);
   }
 
+  /// 变量声明
   @override
   Map? visitVariableDeclaration(VariableDeclaration node) {
-    return _buildVariableDeclaration(node.name.accept(this), node.initializer?.accept(this));
+    var id = node.name.accept(this);
+    var init = node.initializer?.accept(this);
+    return {
+      'type': 'VariableDeclarator',
+      'id': id,
+      'init': init,
+    };
   }
 
   @override
@@ -108,16 +111,12 @@ class AstVisitor extends SimpleAstVisitor<Map> {
         accept(node.metadata, this), node.toSource());
   }
 
+  //标识符定义
   @override
   Map? visitSimpleIdentifier(SimpleIdentifier node) {
-    return _buildIdentifier(node.name);
+    var name = node.name;
+    return {'type': 'Identifier', 'name': name};
   }
-
-  // @override
-//  Map visitBinaryExpression(BinaryExpression node) {
-//    return _buildBinaryExpression(_safelyVisitNode(node.leftOperand),
-//        _safelyVisitNode(node.rightOperand), node.operator.lexeme);
-//  }
 
   @override
   Map? visitIntegerLiteral(IntegerLiteral node) {
@@ -132,9 +131,17 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     return _buildNumericLiteral(node.value);
   }
 
+  /// 函数声明
   @override
   Map? visitFunctionDeclaration(FunctionDeclaration node) {
-    return _buildFunctionDeclaration(node.name.accept(this), node.functionExpression.accept(this));
+    var id = node.name.accept(this);
+    var expression = node.functionExpression.accept(this);
+
+    return {
+      'type': 'FunctionDeclaration',
+      'id': id,
+      'expression': expression,
+    };
   }
 
   @override
@@ -143,9 +150,11 @@ class AstVisitor extends SimpleAstVisitor<Map> {
   }
 
   //()=>方法
+  /// 代码块
   @override
   Map? visitExpressionFunctionBody(ExpressionFunctionBody node) {
-    return _buildBloc([node.expression.accept(this)]);
+    var body = node.expression.accept(this);
+    return {'type': 'BlockStatement', 'body': [body]};
   }
 
   @override
@@ -174,22 +183,40 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     return _buildReturnStatement(node.expression?.accept(this));
   }
 
+  ///方法声明
   @override
   Map? visitMethodDeclaration(MethodDeclaration node) {
-    return _buildMethodDeclaration(
-        node.name.accept(this),
-        node.parameters?.accept(this),
-        node.typeParameters?.accept(this),
-        node.body.accept(this),
-        node.returnType?.accept(this),
-        accept(node.metadata, this),
-        node.toSource(),
-        isAsync: node.body.isAsynchronous);
+    var id = node.name.accept(this);
+    var parameters = node.parameters?.accept(this);
+    var typeParameters = node.typeParameters?.accept(this);
+    var body = node.body.accept(this);
+    var isAsync = node.body.isAsynchronous;
+    var returnType = node.returnType?.accept(this);
+    var annotations = accept(node.metadata, this);
+    var source = node.toSource();
+
+    return {
+      'type': 'MethodDeclaration',
+      'id': id,
+      'parameters': parameters,
+      'typeParameters': typeParameters,
+      'body': body,
+      'isAsync': isAsync,
+      'returnType': returnType,
+      'annotations': annotations,
+      'source': source
+    };
   }
 
   @override
   Map? visitNamedExpression(NamedExpression node) {
-    return _buildNamedExpression(node.name.accept(this), node.expression.accept(this));
+    var id = node.name.accept(this);
+    var expression = node.expression.accept(this);
+    return {
+      'type': 'NamedExpression',
+      'id': id,
+      'expression': expression,
+    };
   }
 
   @override
@@ -255,7 +282,8 @@ class AstVisitor extends SimpleAstVisitor<Map> {
 
   @override
   Map? visitArgumentList(ArgumentList node) {
-    return _buildArgumentList(accept(node.arguments, this));
+    var argumentList = accept(node.arguments, this);
+    return {'type': 'ArgumentList', 'argumentList': argumentList};
   }
 
   @override
@@ -284,36 +312,6 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     return _buildVariableExpression(expression);
   }
 
-  ///根节点
-  Map? _buildAstRoot(List<Map> body) {
-    if (body.isNotEmpty) {
-      return {
-        'type': 'Program',
-        'body': body,
-      };
-    } else {
-      return null;
-    }
-  }
-
-  //代码块
-  Map _buildBloc(List body) => {'type': 'BlockStatement', 'body': body};
-
-//  //运算表达式结构
-//  Map _buildBinaryExpression(Map left, Map right, String lexeme) => {
-//    'type': 'BinaryExpression',
-//    'operator': lexeme,
-//    'left': left,
-//    'right': right
-//  };
-
-  //变量声明
-  Map _buildVariableDeclaration(Map? id, Map? init) => {
-        'type': 'VariableDeclarator',
-        'id': id,
-        'init': init,
-      };
-
   //变量声明列表
   Map _buildVariableDeclarationList(
           Map? typeAnnotation, List<Map> declarations, List<Map> annotations, String source) =>
@@ -325,18 +323,8 @@ class AstVisitor extends SimpleAstVisitor<Map> {
         'source': source
       };
 
-  //标识符定义
-  Map _buildIdentifier(String name) => {'type': 'Identifier', 'name': name};
-
   //数值定义
   Map _buildNumericLiteral(num? value) => {'type': 'NumericLiteral', 'value': value};
-
-  //函数声明
-  Map _buildFunctionDeclaration(Map? id, Map? expression) => {
-        'type': 'FunctionDeclaration',
-        'id': id,
-        'expression': expression,
-      };
 
   //函数表达式
   Map _buildFunctionExpression(Map? params, Map? body, {bool isAsync = false}) => {
@@ -366,27 +354,6 @@ class AstVisitor extends SimpleAstVisitor<Map> {
         'argument': argument,
       };
 
-  //方法声明
-  Map _buildMethodDeclaration(Map? id, Map? parameters, Map? typeParameters, Map? body,
-          Map? returnType, List<Map> annotations, String source,
-          {bool isAsync = false}) =>
-      {
-        'type': 'MethodDeclaration',
-        'id': id,
-        'parameters': parameters,
-        'typeParameters': typeParameters,
-        'body': body,
-        'isAsync': isAsync,
-        'returnType': returnType,
-        'annotations': annotations,
-        'source': source
-      };
-
-  Map _buildNamedExpression(Map? id, Map? expression) => {
-        'type': 'NamedExpression',
-        'id': id,
-        'expression': expression,
-      };
 
   Map _buildPrefixedIdentifier(Map? identifier, Map? prefix) => {
         'type': 'PrefixedIdentifier',
@@ -413,9 +380,6 @@ class AstVisitor extends SimpleAstVisitor<Map> {
         'body': body,
       };
 
-  Map _buildArgumentList(List<Map> argumentList) =>
-      {'type': 'ArgumentList', 'argumentList': argumentList};
-
   Map _buildStringLiteral(String value) => {'type': 'StringLiteral', 'value': value};
 
   Map _buildBooleanLiteral(bool value) => {'type': 'BooleanLiteral', 'value': value};
@@ -423,25 +387,11 @@ class AstVisitor extends SimpleAstVisitor<Map> {
   Map _buildImplementsClause(List<Map> implementList) =>
       {'type': 'ImplementsClause', 'implements': implementList};
 
-  Map _buildPropertyAccess(Map id, Map expression) => {
-        'type': 'PropertyAccess',
-        'id': id,
-        'expression': expression,
-      };
-
   Map _buildVariableExpression(String? expression) =>
       {'type': 'VariableExpression', 'expression': expression};
 
-//  Map _buildPostfixExpression(Map operand, String operator) =>
-//      {'type': 'PostfixExpression', 'operand': operand, 'operator': operator};
-
   Map _buildPrefixExpression(Map? argument, String oprator, bool prefix) =>
       {'type': 'PrefixExpression', 'argument': argument, 'prefix': prefix, 'operator': oprator};
-
-  Map _buildVisitListLiteral(List<Map> literal) => {'type': 'ListLiteral', 'elements': literal};
-
-  Map _buildAnnotation(Map? name, Map? argumentList) =>
-      {'type': 'Annotation', 'id': name, 'argumentList': argumentList};
 
   Map _buildSetOrMapLiteral(List<Map> elements) =>
       {'type': 'SetOrMapLiteral', 'elements': elements};
