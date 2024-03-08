@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/dart/ast/ast.dart';
+import 'package:dyna_flutter/dyna_builder/ast_name.dart';
 
 class AstVisitor extends SimpleAstVisitor<Map> {
   @override
@@ -9,24 +10,24 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     var name = node.name.accept(this);
     var argumentList = node.arguments?.accept(this);
 
-    return {'type': 'Annotation', 'id': name, 'argumentList': argumentList};
+    return {'type': AstName.Annotation.name, 'id': name, 'argumentList': argumentList};
   }
 
   @override
   Map? visitListLiteral(ListLiteral node) {
     var element = accept(node.elements, this);
-    return {'type': 'ListLiteral', 'elements': element};
+    return {'type': AstName.ListLiteral.name, 'elements': element};
   }
 
   @override
   Map? visitStringInterpolation(StringInterpolation node) {
-    return {'type': 'StringInterpolation', 'sourceString': node.toSource()};
+    return {'type': AstName.StringInterpolation.name, 'sourceString': node.toSource()};
   }
 
   @override
   Map? visitPostfixExpression(PostfixExpression node) {
     return {
-      'type': 'PrefixExpression',
+      'type': AstName.PrefixExpression.name,
       'argument': node.operand.accept(this),
       'prefix': false,
       'operator': node.operator.toString()
@@ -42,7 +43,7 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     var source = node.toSource();
 
     return {
-      'type': 'VariableDeclarationList',
+      'type': AstName.VariableDeclarationList.name,
       'typeAnnotation': typeAnnotation,
       'declarations': declarations,
       'annotations': annotations,
@@ -67,7 +68,7 @@ class AstVisitor extends SimpleAstVisitor<Map> {
   @override
   Map? visitBlock(Block node) {
     var body = accept(node.statements, this);
-    return {'type': 'BlockStatement', 'body': body};
+    return {'type': AstName.BlockStatement.name, 'body': body};
   }
 
   /// 变量声明
@@ -76,7 +77,7 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     var id = node.name.accept(this);
     var init = node.initializer?.accept(this);
     return {
-      'type': 'VariableDeclarator',
+      'type': AstName.VariableDeclarator.name,
       'id': id,
       'init': init,
     };
@@ -91,7 +92,7 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     var source = node.toSource();
 
     return {
-      'type': 'VariableDeclarationList',
+      'type': AstName.VariableDeclarationList.name,
       'typeAnnotation': typeAnnotation,
       'declarations': declarations,
       'annotations': annotations,
@@ -103,7 +104,7 @@ class AstVisitor extends SimpleAstVisitor<Map> {
   @override
   Map? visitSimpleIdentifier(SimpleIdentifier node) {
     var name = node.name;
-    return {'type': 'Identifier', 'name': name};
+    return {'type': AstName.Identifier.name, 'name': name};
   }
 
   /// 函数声明
@@ -113,7 +114,7 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     var expression = node.functionExpression.accept(this);
 
     return {
-      'type': 'FunctionDeclaration',
+      'type': AstName.FunctionDeclaration.name,
       'id': id,
       'expression': expression,
     };
@@ -130,7 +131,7 @@ class AstVisitor extends SimpleAstVisitor<Map> {
   Map? visitExpressionFunctionBody(ExpressionFunctionBody node) {
     var body = node.expression.accept(this);
     return {
-      'type': 'BlockStatement',
+      'type': AstName.BlockStatement.name,
       'body': [body]
     };
   }
@@ -142,7 +143,7 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     var body = node.body.accept(this);
     var isAsync = node.body.isAsynchronous;
     return {
-      'type': 'FunctionExpression',
+      'type': AstName.FunctionExpression.name,
       'parameters': params,
       'body': body,
       'isAsync': isAsync,
@@ -154,21 +155,21 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     var type = node.type?.accept(this);
     var name = node.identifier?.name;
 
-    return {'type': 'SimpleFormalParameter', 'paramType': type, 'name': name};
+    return {'type': AstName.SimpleFormalParameter.name, 'paramType': type, 'name': name};
   }
 
   //函数参数列表
   @override
   Map? visitFormalParameterList(FormalParameterList node) {
     var parameterList = accept(node.parameters, this);
-    return {'type': 'FormalParameterList', 'parameterList': parameterList};
+    return {'type': AstName.FormalParameterList.name, 'parameterList': parameterList};
   }
 
   /// 函数参数类型
   @override
   Map? visitTypeName(TypeName node) {
     var name = node.name.name;
-    return {'type': 'TypeName', 'name': name};
+    return {'type': AstName.TypeName.name, 'name': name};
   }
 
   /// 返回数据定义
@@ -176,7 +177,7 @@ class AstVisitor extends SimpleAstVisitor<Map> {
   Map? visitReturnStatement(ReturnStatement node) {
     var argument = node.expression?.accept(this);
     return {
-      'type': 'ReturnStatement',
+      'type': AstName.ReturnStatement.name,
       'argument': argument,
     };
   }
@@ -194,7 +195,7 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     var source = node.toSource();
 
     return {
-      'type': 'MethodDeclaration',
+      'type': AstName.MethodDeclaration.name,
       'id': id,
       'parameters': parameters,
       'typeParameters': typeParameters,
@@ -211,7 +212,7 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     var id = node.name.accept(this);
     var expression = node.expression.accept(this);
     return {
-      'type': 'NamedExpression',
+      'type': AstName.NamedExpression.name,
       'id': id,
       'expression': expression,
     };
@@ -222,7 +223,7 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     var identifier = node.identifier.accept(this);
     var prefix = node.prefix.accept(this);
     return {
-      'type': 'PrefixedIdentifier',
+      'type': AstName.PrefixedIdentifier.name,
       'identifier': identifier,
       'prefix': prefix,
     };
@@ -232,9 +233,8 @@ class AstVisitor extends SimpleAstVisitor<Map> {
   Map? visitMethodInvocation(MethodInvocation node) {
     Map? callee;
     if (node.target != null) {
-      node.target?.accept(this);
       callee = {
-        'type': 'MemberExpression',
+        'type': AstName.MemberExpression.name,
         'object': node.target?.accept(this),
         'property': node.methodName.accept(this),
       };
@@ -246,7 +246,7 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     var argumentList = node.argumentList.accept(this);
 
     return {
-      'type': 'MethodInvocation',
+      'type': AstName.MethodInvocation.name,
       'callee': callee,
       'typeArguments': typeArguments,
       'argumentList': argumentList,
@@ -264,7 +264,7 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     var metadata = accept(node.metadata, this);
     var body = accept(node.members, this);
     return {
-      'type': 'ClassDeclaration',
+      'type': AstName.ClassDeclaration.name,
       'id': id,
       'superClause': superClause,
       'implementsClause': implementsClause,
@@ -280,7 +280,7 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     if (node.constructorName.type.name is PrefixedIdentifier) {
       var prefixedIdentifier = node.constructorName.type.name as PrefixedIdentifier;
       callee = {
-        'type': 'MemberExpression',
+        'type': AstName.MemberExpression.name,
         'object': prefixedIdentifier.prefix.accept(this),
         'property': prefixedIdentifier.identifier.accept(this),
       };
@@ -290,7 +290,7 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     }
     var argumentList = node.argumentList.accept(this);
     return {
-      'type': 'MethodInvocation',
+      'type': AstName.MethodInvocation.name,
       'callee': callee,
       'typeArguments': null,
       'argumentList': argumentList,
@@ -299,7 +299,7 @@ class AstVisitor extends SimpleAstVisitor<Map> {
 
   @override
   Map? visitSimpleStringLiteral(SimpleStringLiteral node) {
-    return {'type': 'StringLiteral', 'value': node.value};
+    return {'type': AstName.StringLiteral.name, 'value': node.value};
   }
 
   @override
@@ -309,7 +309,7 @@ class AstVisitor extends SimpleAstVisitor<Map> {
 
   @override
   Map? visitArgumentList(ArgumentList node) {
-    return {'type': 'ArgumentList', 'argumentList': accept(node.arguments, this)};
+    return {'type': AstName.ArgumentList.name, 'argumentList': accept(node.arguments, this)};
   }
 
   @override
