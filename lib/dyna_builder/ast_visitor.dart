@@ -1,36 +1,42 @@
-import 'dart:io';
-
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:dyna_flutter/dyna_builder/ast_name.dart';
+
+import 'ast_key.dart';
 
 class AstVisitor extends SimpleAstVisitor<Map> {
   @override
   Map? visitAnnotation(Annotation node) {
     var name = node.name.accept(this);
     var argumentList = node.arguments?.accept(this);
-
-    return {'type': AstName.Annotation.name, 'id': name, 'argumentList': argumentList};
+    return {
+      AstKey.NODE: AstName.Annotation.name,
+      AstKey.ID: name,
+      AstKey.ARGUMENT_LIST: argumentList
+    };
   }
 
   @override
   Map? visitListLiteral(ListLiteral node) {
     var element = accept(node.elements, this);
-    return {'type': AstName.ListLiteral.name, 'elements': element};
+    return {AstKey.NODE: AstName.ListLiteral.name, AstKey.ELEMENTS: element};
   }
 
   @override
   Map? visitStringInterpolation(StringInterpolation node) {
-    return {'type': AstName.StringInterpolation.name, 'sourceString': node.toSource()};
+    return {
+      AstKey.NODE: AstName.StringInterpolation.name,
+      AstKey.SOURCE_STRING: node.toSource()
+    };
   }
 
   @override
   Map? visitPostfixExpression(PostfixExpression node) {
     return {
-      'type': AstName.PrefixExpression.name,
-      'argument': node.operand.accept(this),
-      'prefix': false,
-      'operator': node.operator.toString()
+      AstKey.NODE: AstName.PrefixExpression.name,
+      AstKey.ARGUMENT: node.operand.accept(this),
+      AstKey.PREFIX: false,
+      AstKey.OPERATOR: node.operator.toString()
     };
   }
 
@@ -43,11 +49,11 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     var source = node.toSource();
 
     return {
-      'type': AstName.VariableDeclarationList.name,
-      'typeAnnotation': typeAnnotation,
-      'declarations': declarations,
-      'annotations': annotations,
-      'source': source
+      AstKey.NODE: AstName.VariableDeclarationList.name,
+      AstKey.TYPE_ANNOTATION: typeAnnotation,
+      AstKey.DECLARATIONS: declarations,
+      AstKey.ANNOTATIONS: annotations,
+      AstKey.SOURCE: source
     };
   }
 
@@ -57,8 +63,8 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     var body = accept(node.declarations, this);
     if (body.isNotEmpty) {
       return {
-        'type': 'Program',
-        'body': body,
+        AstKey.NODE: 'Program',
+        AstKey.BODY: body,
       };
     } else {
       return null;
@@ -68,7 +74,7 @@ class AstVisitor extends SimpleAstVisitor<Map> {
   @override
   Map? visitBlock(Block node) {
     var body = accept(node.statements, this);
-    return {'type': AstName.BlockStatement.name, 'body': body};
+    return {AstKey.NODE: AstName.BlockStatement.name, AstKey.BODY: body};
   }
 
   /// 变量声明
@@ -77,9 +83,9 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     var id = node.name.accept(this);
     var init = node.initializer?.accept(this);
     return {
-      'type': AstName.VariableDeclarator.name,
-      'id': id,
-      'init': init,
+      AstKey.NODE: AstName.VariableDeclarator.name,
+      AstKey.ID: id,
+      AstKey.INIT: init,
     };
   }
 
@@ -92,11 +98,11 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     var source = node.toSource();
 
     return {
-      'type': AstName.VariableDeclarationList.name,
-      'typeAnnotation': typeAnnotation,
-      'declarations': declarations,
-      'annotations': annotations,
-      'source': source
+      AstKey.NODE: AstName.VariableDeclarationList.name,
+      AstKey.TYPE_ANNOTATION: typeAnnotation,
+      AstKey.DECLARATIONS: declarations,
+      AstKey.ANNOTATIONS: annotations,
+      AstKey.SOURCE: source
     };
   }
 
@@ -104,7 +110,7 @@ class AstVisitor extends SimpleAstVisitor<Map> {
   @override
   Map? visitSimpleIdentifier(SimpleIdentifier node) {
     var name = node.name;
-    return {'type': AstName.Identifier.name, 'name': name};
+    return {AstKey.NODE: AstName.Identifier.name, AstKey.NAME: name};
   }
 
   /// 函数声明
@@ -114,9 +120,9 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     var expression = node.functionExpression.accept(this);
 
     return {
-      'type': AstName.FunctionDeclaration.name,
-      'id': id,
-      'expression': expression,
+      AstKey.NODE: AstName.FunctionDeclaration.name,
+      AstKey.ID: id,
+      AstKey.EXPRESSION: expression,
     };
   }
 
@@ -131,8 +137,8 @@ class AstVisitor extends SimpleAstVisitor<Map> {
   Map? visitExpressionFunctionBody(ExpressionFunctionBody node) {
     var body = node.expression.accept(this);
     return {
-      'type': AstName.BlockStatement.name,
-      'body': [body]
+      AstKey.NODE: AstName.BlockStatement.name,
+      AstKey.BODY: [body]
     };
   }
 
@@ -143,10 +149,10 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     var body = node.body.accept(this);
     var isAsync = node.body.isAsynchronous;
     return {
-      'type': AstName.FunctionExpression.name,
-      'parameters': params,
-      'body': body,
-      'isAsync': isAsync,
+      AstKey.NODE: AstName.FunctionExpression.name,
+      AstKey.PARAMETERS: params,
+      AstKey.BODY: body,
+      AstKey.IS_ASYNC: isAsync,
     };
   }
 
@@ -155,21 +161,28 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     var type = node.type?.accept(this);
     var name = node.identifier?.name;
 
-    return {'type': AstName.SimpleFormalParameter.name, 'paramType': type, 'name': name};
+    return {
+      AstKey.NODE: AstName.SimpleFormalParameter.name,
+      AstKey.PARAM_TYPE: type,
+      AstKey.NAME: name
+    };
   }
 
   //函数参数列表
   @override
   Map? visitFormalParameterList(FormalParameterList node) {
     var parameterList = accept(node.parameters, this);
-    return {'type': AstName.FormalParameterList.name, 'parameterList': parameterList};
+    return {
+      AstKey.NODE: AstName.FormalParameterList.name,
+      AstKey.PARAMETER_LIST: parameterList
+    };
   }
 
   /// 函数参数类型
   @override
   Map? visitTypeName(TypeName node) {
     var name = node.name.name;
-    return {'type': AstName.TypeName.name, 'name': name};
+    return {AstKey.NODE: AstName.TypeName.name, AstKey.NAME: name};
   }
 
   /// 返回数据定义
@@ -177,8 +190,8 @@ class AstVisitor extends SimpleAstVisitor<Map> {
   Map? visitReturnStatement(ReturnStatement node) {
     var argument = node.expression?.accept(this);
     return {
-      'type': AstName.ReturnStatement.name,
-      'argument': argument,
+      AstKey.NODE: AstName.ReturnStatement.name,
+      AstKey.ARGUMENT: argument,
     };
   }
 
@@ -195,15 +208,15 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     var source = node.toSource();
 
     return {
-      'type': AstName.MethodDeclaration.name,
-      'id': id,
-      'parameters': parameters,
-      'typeParameters': typeParameters,
-      'body': body,
-      'isAsync': isAsync,
-      'returnType': returnType,
-      'annotations': annotations,
-      'source': source
+      AstKey.NODE: AstName.MethodDeclaration.name,
+      AstKey.ID: id,
+      AstKey.PARAMETERS: parameters,
+      AstKey.TYPE_PARAMETERS: typeParameters,
+      AstKey.BODY: body,
+      AstKey.IS_ASYNC: isAsync,
+      AstKey.RETURN_TYPE: returnType,
+      AstKey.ANNOTATIONS: annotations,
+      AstKey.SOURCE: source
     };
   }
 
@@ -212,9 +225,9 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     var id = node.name.accept(this);
     var expression = node.expression.accept(this);
     return {
-      'type': AstName.NamedExpression.name,
-      'id': id,
-      'expression': expression,
+      AstKey.NODE: AstName.NamedExpression.name,
+      AstKey.ID: id,
+      AstKey.EXPRESSION: expression,
     };
   }
 
@@ -223,9 +236,9 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     var identifier = node.identifier.accept(this);
     var prefix = node.prefix.accept(this);
     return {
-      'type': AstName.PrefixedIdentifier.name,
-      'identifier': identifier,
-      'prefix': prefix,
+      AstKey.NODE: AstName.PrefixedIdentifier.name,
+      AstKey.IDENTIFIER: identifier,
+      AstKey.PREFIX: prefix,
     };
   }
 
@@ -234,9 +247,9 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     Map? callee;
     if (node.target != null) {
       callee = {
-        'type': AstName.MemberExpression.name,
-        'object': node.target?.accept(this),
-        'property': node.methodName.accept(this),
+        AstKey.NODE: AstName.MemberExpression.name,
+        AstKey.OBJECT: node.target?.accept(this),
+        AstKey.PROPERTY: node.methodName.accept(this),
       };
     } else {
       callee = node.methodName.accept(this);
@@ -246,10 +259,10 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     var argumentList = node.argumentList.accept(this);
 
     return {
-      'type': AstName.MethodInvocation.name,
-      'callee': callee,
-      'typeArguments': typeArguments,
-      'argumentList': argumentList,
+      AstKey.NODE: AstName.MethodInvocation.name,
+      AstKey.CALLEE: callee,
+      AstKey.TYPE_ARGUMENTS: typeArguments,
+      AstKey.ARGUMENT_LIST: argumentList,
     };
   }
 
@@ -264,13 +277,13 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     var metadata = accept(node.metadata, this);
     var body = accept(node.members, this);
     return {
-      'type': AstName.ClassDeclaration.name,
-      'id': id,
-      'superClause': superClause,
-      'implementsClause': implementsClause,
-      'mixinClause': mixinClause,
-      'metadata': metadata,
-      'body': body,
+      AstKey.NODE: AstName.ClassDeclaration.name,
+      AstKey.ID: id,
+      AstKey.SUPER_CLAUSE: superClause,
+      AstKey.IMPLEMENTS_CLAUSE: implementsClause,
+      AstKey.MIXIN_CLAUSE: mixinClause,
+      AstKey.METADATA: metadata,
+      AstKey.BODY: body,
     };
   }
 
@@ -278,11 +291,12 @@ class AstVisitor extends SimpleAstVisitor<Map> {
   Map? visitInstanceCreationExpression(InstanceCreationExpression node) {
     Map? callee;
     if (node.constructorName.type.name is PrefixedIdentifier) {
-      var prefixedIdentifier = node.constructorName.type.name as PrefixedIdentifier;
+      var prefixedIdentifier =
+          node.constructorName.type.name as PrefixedIdentifier;
       callee = {
-        'type': AstName.MemberExpression.name,
-        'object': prefixedIdentifier.prefix.accept(this),
-        'property': prefixedIdentifier.identifier.accept(this),
+        AstKey.NODE: AstName.MemberExpression.name,
+        AstKey.OBJECT: prefixedIdentifier.prefix.accept(this),
+        AstKey.PROPERTY: prefixedIdentifier.identifier.accept(this),
       };
     } else {
       //如果不是simpleIdentif 需要特殊处理
@@ -290,16 +304,16 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     }
     var argumentList = node.argumentList.accept(this);
     return {
-      'type': AstName.MethodInvocation.name,
-      'callee': callee,
-      'typeArguments': null,
-      'argumentList': argumentList,
+      AstKey.NODE: AstName.MethodInvocation.name,
+      AstKey.CALLEE: callee,
+      AstKey.TYPE_ARGUMENTS: null,
+      AstKey.ARGUMENT_LIST: argumentList,
     };
   }
 
   @override
   Map? visitSimpleStringLiteral(SimpleStringLiteral node) {
-    return {'type': AstName.StringLiteral.name, 'value': node.value};
+    return {AstKey.NODE: AstName.StringLiteral.name, AstKey.VALUE: node.value};
   }
 
   @override
@@ -309,13 +323,20 @@ class AstVisitor extends SimpleAstVisitor<Map> {
 
   @override
   Map? visitArgumentList(ArgumentList node) {
-    return {'type': AstName.ArgumentList.name, 'argumentList': accept(node.arguments, this)};
+    return {
+      AstKey.NODE: AstName.ArgumentList.name,
+      AstKey.ARGUMENT_LIST: accept(node.arguments, this)
+    };
   }
 
   @override
   Map? visitImplementsClause(ImplementsClause node) {
-    return {'type': 'ImplementsClause', 'implements': accept(node.interfaces, this)};
+    return {
+      AstKey.NODE: AstKey.IMPLEMENTS_CLAUSE,
+      AstKey.IMPLEMENTS: accept(node.interfaces, this)
+    };
   }
+
   @override
   Map? visitExtendsClause(ExtendsClause node) {
     return node.superclass.accept(this);
