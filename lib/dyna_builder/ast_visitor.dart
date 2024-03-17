@@ -63,7 +63,7 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     var body = accept(node.declarations, this);
     if (body.isNotEmpty) {
       return {
-        AstKey.NODE: 'Program',
+        AstKey.NODE: AstName.Unit.name,
         AstKey.BODY: body,
       };
     } else {

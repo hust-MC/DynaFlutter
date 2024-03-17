@@ -21,5 +21,5 @@ enum AstName {
   FunctionExpression,
   PrefixExpression,
   StringInterpolation,
-  Program
+  Unit
 }

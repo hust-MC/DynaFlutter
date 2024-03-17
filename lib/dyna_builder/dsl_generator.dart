@@ -36,7 +36,7 @@ class DslGenerator extends GeneratorForAnnotation<DynaBlock> {
     print('MCLOG====[dynaFlutter] ast：$astString');
 
     var rootExpression = Expression.fromAst(ast);
-    var bodyList = rootExpression!.toProgram.body;
+    var bodyList = rootExpression!.toUnit.body;
     if ((bodyList?.length ?? 0) == 0) {
       return null;
     }
