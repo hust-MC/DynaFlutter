@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/src/builder/build_step.dart';
+import 'package:dyna_flutter/dyna_builder/ast_name.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:analyzer/dart/analysis/features.dart';
 import 'ast_node.dart';
@@ -42,27 +43,25 @@ class DslGenerator extends GeneratorForAnnotation<DynaBlock> {
     var tmpMap = {};
     var result = '';
     for (var body in bodyList!) {
-      print("MCLOG==== Current body: ${body?.type}");
-      if (body?.isClassDeclaration == true) {
+
+      if (body?.nodeTypeName == AstName.ClassDeclaration.name) {
+
         var classBodyList = body!.asClassDeclaration.body;
         for (var bodyNode in classBodyList!) {
-          if (bodyNode?.isMethodDeclaration == true) {
+          if (bodyNode?.nodeTypeName == AstName.MethodDeclaration.name) {
             var buildBodyReturn = bodyNode?.asMethodDeclaration.body?.body;
             print("MCLOG==== Current buildBodyReturn: $buildBodyReturn");
 
             if (buildBodyReturn?.isNotEmpty == true &&
-                buildBodyReturn?.last?.isReturnStatement == true &&
+                buildBodyReturn?.last?.nodeTypeName == AstName.ReturnStatement.name &&
                 buildBodyReturn?.last?.asReturnStatement.argument != null) {
               if (bodyNode?.asMethodDeclaration.name == 'build') {
-                print(
-                    "MCLOG==== buildBodyReturn last: ${buildBodyReturn?.last}");
+                print("MCLOG==== buildBodyReturn last: ${buildBodyReturn?.last}");
 
-                tmpMap = _buildWidgetDsl(
-                    buildBodyReturn?.last?.asReturnStatement.argument);
+                tmpMap = _buildWidgetDsl(buildBodyReturn?.last?.asReturnStatement.argument);
                 var encoder = const JsonEncoder.withIndent('  ');
 
                 result = encoder.convert(tmpMap);
-
               }
             }
           }
@@ -86,7 +85,7 @@ class DslGenerator extends GeneratorForAnnotation<DynaBlock> {
     print("MCLOG==== methodInvocationExpression: $methodInvocationExpression");
 
     //普通类
-    if (methodInvocationExpression?.callee?.isIdentifier == true) {
+    if (methodInvocationExpression?.callee?.nodeTypeName == AstName.Identifier.name) {
       print(
           'MCLOG==== isIdentifier name : ${methodInvocationExpression?.callee?.asIdentifier.name}');
 
@@ -99,14 +98,13 @@ class DslGenerator extends GeneratorForAnnotation<DynaBlock> {
       //   return '%(${methodInvocationExpression?.callee?.asIdentifier.name})';
       // }
 
-      dslMap.putIfAbsent('widget',
-            () => methodInvocationExpression?.callee?.asIdentifier.name);
-    } else if (methodInvocationExpression?.callee?.isMemberExpression == true) {
+      dslMap.putIfAbsent('widget', () => methodInvocationExpression?.callee?.asIdentifier.name);
+    } else if (methodInvocationExpression?.callee?.nodeTypeName ==
+        AstName.MemberExpression.name) {
       //方法类
       print('MCLOG==== isMemberExpression}');
 
-      var memberExpression =
-          methodInvocationExpression?.callee?.asMemberExpression;
+      var memberExpression = methodInvocationExpression?.callee?.asMemberExpression;
       try {
         dslMap.putIfAbsent(
             'className',
@@ -128,12 +126,11 @@ class DslGenerator extends GeneratorForAnnotation<DynaBlock> {
 
     //1.pa
     for (var arg in methodInvocationExpression!.argumentList!) {
-      if (arg?.isNamedExpression == true) {
+      if (arg?.nodeTypeName == AstName.NamedExpression.name) {
         break;
       }
       //pa 常量处理
       var valueExpression = arg;
-      valueExpression?.isFuncParam = true;
       var paValue = _buildValueExpression(valueExpression);
       paMap.add(paValue);
     }
@@ -141,7 +138,7 @@ class DslGenerator extends GeneratorForAnnotation<DynaBlock> {
 
     //2.na
     for (var arg in methodInvocationExpression.argumentList!) {
-      if (arg?.isNamedExpression == true) {
+      if (arg?.nodeTypeName == AstName.NamedExpression.name) {
         var nameExpression = arg?.asNamedExpression;
         if (nameExpression == null) {
           continue;
@@ -176,29 +173,16 @@ class DslGenerator extends GeneratorForAnnotation<DynaBlock> {
 
     var naPaValue;
 
-    if (valueExpression?.isIdentifier == true) {
-      //映射变量声明
-      // if (fairDslContex?.variableAnnotation
-      //     .containsKey(valueExpression?.asIdentifier.name)==true ||
-      //     fairDslContex?.methodAnnotation
-      //         .containsKey(valueExpression?.asIdentifier.name)==true) {
-      //   naPaValue = '#(' + (valueExpression?.asIdentifier.name??'') + ')';
-      // }
-      // // else if (fairDslContex.variables
-      // //     .containsKey(valueExpression.asIdentifier.name)) {
-      // //   naPaValue = '\$(' + valueExpression.asIdentifier.name + ')';
-      // // }
-      // else
-      if (FairLogicUnit()
-          .functions
-          .containsKey(valueExpression?.asIdentifier.name)) {
+    if (valueExpression?.nodeTypeName == AstName.Identifier.name) {
+      if (FairLogicUnit().functions.containsKey(valueExpression?.asIdentifier.name)) {
+        print('FairLogicUnit: ${valueExpression?.asIdentifier.name}');
         naPaValue = '@(' + (valueExpression?.asIdentifier.name ?? '') + ')';
       } else {
         naPaValue = '^(' + (valueExpression?.asIdentifier.name ?? '') + ')';
       }
-    } else if (valueExpression?.isStringLiteral == true) {
+    } else if (valueExpression?.nodeTypeName == AstName.StringLiteral.name) {
       naPaValue = valueExpression?.asStringLiteral.value;
-    } else if (valueExpression?.isPrefixedIdentifier == true) {
+    } else if (valueExpression?.nodeTypeName == AstName.PrefixedIdentifier.name) {
       if (RegExp(r'^[a-z_]') // widget.** 参数类的特殊处理成#(),兼容1期
               .hasMatch(valueExpression?.asPrefixedIdentifier.prefix ?? '') &&
           ('widget' != valueExpression?.asPrefixedIdentifier.prefix)) {
@@ -214,37 +198,20 @@ class DslGenerator extends GeneratorForAnnotation<DynaBlock> {
             (valueExpression?.asPrefixedIdentifier.identifier ?? '') +
             ')';
       }
-    } else if (valueExpression?.isListLiteral == true) {
+    } else if (valueExpression?.nodeTypeName == AstName.ListLiteral.name) {
       var widgetExpressionList = [];
-      for (var itemWidgetExpression
-          in valueExpression!.asListLiteral.elements!) {
+      for (var itemWidgetExpression in valueExpression!.asListLiteral.elements!) {
         widgetExpressionList.add(_buildValueExpression(itemWidgetExpression));
       }
       naPaValue = widgetExpressionList;
-    } else if (valueExpression?.isFunctionExpression == true) {
+    } else if (valueExpression?.nodeTypeName == AstName.FunctionExpression.name) {
       naPaValue = '';
       if (valueExpression?.asFunctionExpression.body != null &&
-          valueExpression?.asFunctionExpression.body?.body?.isNotEmpty ==
-              true) {
-        naPaValue = _buildValueExpression(
-            valueExpression?.asFunctionExpression.body?.body?.last);
+          valueExpression?.asFunctionExpression.body?.body?.isNotEmpty == true) {
+        naPaValue = _buildValueExpression(valueExpression?.asFunctionExpression.body?.body?.last);
       }
-    } else if (valueExpression?.isReturnStatement == true) {
-      naPaValue =
-          _buildValueExpression(valueExpression?.asReturnStatement.argument);
-    } else if (valueExpression?.isStringInterpolation == true) {
-      var sourceString =
-          valueExpression?.asStringInterpolation.sourceString ?? '';
-      if (sourceString.length >= 2) {
-        if (sourceString.startsWith('\'') && sourceString.endsWith('\'') ||
-            sourceString.startsWith('\"') && sourceString.endsWith('\"')) {
-          sourceString = sourceString.substring(1, sourceString.length - 1);
-        }
-      }
-      naPaValue = '#(' + sourceString + ')';
-    } else if (valueExpression?.isVariableExpression == true) {
-      var expression = valueExpression?.asVariableExpression.expression ?? '';
-      naPaValue = '\$(' + expression + ')';
+    } else if (valueExpression?.nodeTypeName == AstName.ReturnStatement.name) {
+      naPaValue = _buildValueExpression(valueExpression?.asReturnStatement.argument);
     } else {
       naPaValue = _buildWidgetDsl(valueExpression);
     }

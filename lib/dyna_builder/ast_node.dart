@@ -581,84 +581,17 @@ class Expression extends AstNode {
 
   String nodeTypeName;
 
-  bool? isProgram;
-  bool? isClassDeclaration;
-  bool? isIdentifier;
-  bool? isPrefixedIdentifier;
-  bool? isStringLiteral;
-  bool? isNumericLiteral;
-  bool? isBooleanLiteral;
-  bool? isListLiteral;
-  bool? isMapLiteral;
-  bool? isMethodInvocation;
-  bool? isMemberExpression;
-  bool? isNamedExpression;
-  bool? isVariableDeclarationList;
-  bool? isBinaryExpression;
-  bool? isAssignmentExpression;
-  bool? isPropertyAccess;
-  bool? isMethodDeclaration;
-  bool? isReturnStatement;
-  bool? isFieldDeclaration;
-  bool? isFunctionExpression;
-  bool? isBlockStatement;
-  bool? isFunctionDeclaration;
-  bool? isAwaitExpression;
-  bool? isPrefixExpression;
-  bool? isExpressionStatement;
-  bool? isIfStatement;
-  bool? isForStatement;
-  bool? isSwitchStatement;
-  bool? isIndexExpression;
-  bool? isStringInterpolation;
-  bool? isVariableDeclaration;
-  bool? isVariableExpression;
-  bool? isFuncParam;
-
   @override
   Map? toAst() => _ast;
 
   @override
   String toString() {
     var encoder = const JsonEncoder.withIndent('  ');
-    return encoder.convert(toAst());
+    return "$nodeTypeName: ${encoder.convert(toAst())}";
   }
 
   Expression(
     this._expression, this.nodeTypeName, {
-    this.isProgram = false,
-    this.isIdentifier = false,
-    this.isPrefixedIdentifier = false,
-    this.isStringLiteral = false,
-    this.isNumericLiteral = false,
-    this.isBooleanLiteral = false,
-    this.isListLiteral = false,
-    this.isMapLiteral = false,
-    this.isMethodInvocation = false,
-    this.isMemberExpression = false,
-    this.isNamedExpression = false,
-    this.isVariableDeclarationList = false,
-    this.isBinaryExpression = false,
-    this.isAssignmentExpression = false,
-    this.isPropertyAccess = false,
-    this.isClassDeclaration = false,
-    this.isMethodDeclaration = false,
-    this.isReturnStatement = false,
-    this.isFieldDeclaration = false,
-    this.isFunctionExpression = false,
-    this.isBlockStatement = false,
-    this.isFunctionDeclaration = false,
-    this.isAwaitExpression = false,
-    this.isPrefixExpression = false,
-    this.isExpressionStatement = false,
-    this.isIfStatement = false,
-    this.isForStatement = false,
-    this.isSwitchStatement = false,
-    this.isIndexExpression = false,
-    this.isStringInterpolation = false,
-    this.isVariableDeclaration = false,
-    this.isVariableExpression = false,
-    this.isFuncParam = false,
     Map? ast,
   }) : super(ast: ast);
 
@@ -809,11 +742,11 @@ String _parseStringValue(Map ast) {
 ///解析File 对象 ast
 File? parseFileObject(MethodInvocation fileMethod) {
   var callee = fileMethod.callee;
-  if (callee?.isIdentifier == true && callee?.asIdentifier.name == 'File') {
+  if (callee?._type == AstName.Identifier.name && callee?.asIdentifier.name == 'File') {
     var argumentList = fileMethod.argumentList;
     if (argumentList != null &&
         argumentList.isNotEmpty &&
-        argumentList[0]?.isStringLiteral == true) {
+        argumentList[0]?.nodeTypeName == AstName.StringLiteral.name) {
       var path = argumentList[0]?.asStringLiteral.value;
       return File(path ?? '');
     }
