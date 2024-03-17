@@ -20,16 +20,12 @@ abstract class AstNode {
 
   AstNode({Map? ast, String? type}) {
     _ast = ast;
-    if (type != null) {
-      _type = type;
-    } else {
-      _type = ast?[AstKey.NODE];
-    }
+    _type = ast?[AstKey.NODE];
   }
 
   String? get type => _type;
 
-  Map? toAst();
+  Map? toAst() => _ast;
 }
 
 class Identifier extends AstNode {
@@ -43,9 +39,6 @@ class Identifier extends AstNode {
     }
     return null;
   }
-
-  @override
-  Map? toAst() => _ast;
 }
 
 /// grammar like (prefix.identifier), eg: People.name
@@ -63,9 +56,6 @@ class PrefixedIdentifier extends AstNode {
     }
     return null;
   }
-
-  @override
-  Map? toAst() => _ast;
 }
 
 class StringLiteral extends AstNode {
@@ -79,9 +69,6 @@ class StringLiteral extends AstNode {
     }
     return null;
   }
-
-  @override
-  Map? toAst() => _ast;
 }
 
 class ListLiteral extends AstNode {
@@ -106,9 +93,6 @@ class ListLiteral extends AstNode {
     }
     return null;
   }
-
-  @override
-  Map? toAst() => _ast;
 }
 
 class Annotation extends AstNode {
@@ -125,9 +109,6 @@ class Annotation extends AstNode {
     }
     return null;
   }
-
-  @override
-  Map? toAst() => _ast;
 }
 
 // ignore: slash_for_doc_comments
@@ -160,9 +141,6 @@ class MemberExpression extends AstNode {
     }
     return null;
   }
-
-  @override
-  Map? toAst() => _ast;
 }
 
 class SimpleFormalParameter extends AstNode {
@@ -177,9 +155,6 @@ class SimpleFormalParameter extends AstNode {
     }
     return null;
   }
-
-  @override
-  Map? toAst() => _ast;
 }
 
 class TypeName extends AstNode {
@@ -193,9 +168,6 @@ class TypeName extends AstNode {
     }
     return null;
   }
-
-  @override
-  Map? toAst() => _ast;
 }
 
 class BlockStatement extends AstNode {
@@ -215,9 +187,6 @@ class BlockStatement extends AstNode {
     }
     return null;
   }
-
-  @override
-  Map? toAst() => _ast;
 }
 
 class MethodDeclaration extends AstNode {
@@ -256,9 +225,6 @@ class MethodDeclaration extends AstNode {
     }
     return null;
   }
-
-  @override
-  Map? toAst() => _ast;
 }
 
 class FunctionDeclaration extends AstNode {
@@ -297,9 +263,6 @@ class MethodInvocation extends AstNode {
     }
     return null;
   }
-
-  @override
-  Map? toAst() => _ast;
 }
 
 /// *
@@ -322,9 +285,6 @@ class NamedExpression extends AstNode {
     }
     return null;
   }
-
-  @override
-  Map? toAst() => _ast;
 }
 
 class PrefixExpression extends AstNode {
@@ -347,9 +307,6 @@ class PrefixExpression extends AstNode {
     }
     return null;
   }
-
-  @override
-  Map? toAst() => _ast;
 }
 
 class VariableDeclarator extends AstNode {
@@ -366,9 +323,6 @@ class VariableDeclarator extends AstNode {
     }
     return null;
   }
-
-  @override
-  Map? toAst() => _ast;
 }
 
 class VariableDeclarationList extends AstNode {
@@ -402,9 +356,6 @@ class VariableDeclarationList extends AstNode {
     }
     return null;
   }
-
-  @override
-  Map? toAst() => _ast;
 }
 
 class FunctionExpression extends AstNode {
@@ -431,9 +382,6 @@ class FunctionExpression extends AstNode {
     }
     return null;
   }
-
-  @override
-  Map? toAst() => _ast;
 }
 
 class ClassDeclaration extends AstNode {
@@ -456,9 +404,6 @@ class ClassDeclaration extends AstNode {
     }
     return null;
   }
-
-  @override
-  Map? toAst() => _ast;
 }
 
 class ReturnStatement extends AstNode {
@@ -472,9 +417,6 @@ class ReturnStatement extends AstNode {
     }
     return null;
   }
-
-  @override
-  Map? toAst() => _ast;
 }
 
 class StringInterpolation extends AstNode {
@@ -489,9 +431,6 @@ class StringInterpolation extends AstNode {
     }
     return null;
   }
-
-  @override
-  Map? toAst() => _ast;
 }
 
 class VariableExpression extends AstNode {
@@ -510,9 +449,6 @@ class VariableExpression extends AstNode {
     }
     return null;
   }
-
-  @override
-  Map? toAst() => _ast;
 }
 
 class Program extends AstNode {
@@ -531,27 +467,19 @@ class Program extends AstNode {
     }
     return null;
   }
-
-  @override
-  Map? toAst() => _ast;
 }
 
 ///通用 ast node
 class Expression extends AstNode {
   final AstNode? _expression;
 
-  String nodeTypeName;
-
-  @override
-  Map? toAst() => _ast;
-
   @override
   String toString() {
     var encoder = const JsonEncoder.withIndent('  ');
-    return "$nodeTypeName: ${encoder.convert(toAst())}";
+    return "$type: ${encoder.convert(toAst())}";
   }
 
-  Expression(this._expression, this.nodeTypeName, {Map? ast,}) : super(ast: ast);
+  Expression(this._expression, Map? ast) : super(ast: ast);
 
   static Expression? fromAst(Map? ast) {
     if (ast == null) return null;
@@ -594,7 +522,7 @@ class Expression extends AstNode {
     } else {
       return null;
     }
-    return Expression(expression, astType, ast: ast);
+    return Expression(expression, ast);
   }
 
   Identifier get toIdentifier => _expression as Identifier;
@@ -696,7 +624,7 @@ File? parseFileObject(MethodInvocation fileMethod) {
     var argumentList = fileMethod.argumentList;
     if (argumentList != null &&
         argumentList.isNotEmpty &&
-        argumentList[0]?.nodeTypeName == AstName.StringLiteral.name) {
+        argumentList[0]?.type == AstName.StringLiteral.name) {
       var path = argumentList[0]?.toStringLiteral.value;
       return File(path ?? '');
     }
