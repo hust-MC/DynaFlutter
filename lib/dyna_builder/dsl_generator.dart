@@ -99,13 +99,8 @@ class DslGenerator extends GeneratorForAnnotation<DynaBlock> {
       //   return '%(${methodInvocationExpression?.callee?.asIdentifier.name})';
       // }
 
-      if (RegExp(r'^[a-z_]').hasMatch(
-          methodInvocationExpression?.callee?.asIdentifier.name ?? '')) {
-        return '%(${methodInvocationExpression?.callee?.asIdentifier.name})';
-      } else {
-        dslMap.putIfAbsent('widget',
+      dslMap.putIfAbsent('widget',
             () => methodInvocationExpression?.callee?.asIdentifier.name);
-      }
     } else if (methodInvocationExpression?.callee?.isMemberExpression == true) {
       //方法类
       print('MCLOG==== isMemberExpression}');
@@ -177,6 +172,8 @@ class DslGenerator extends GeneratorForAnnotation<DynaBlock> {
   }
 
   dynamic _buildValueExpression(Expression? valueExpression) {
+    print('MCLOG==== _buildValueExpression: $valueExpression');
+
     var naPaValue;
 
     if (valueExpression?.isIdentifier == true) {
@@ -199,12 +196,8 @@ class DslGenerator extends GeneratorForAnnotation<DynaBlock> {
       } else {
         naPaValue = '^(' + (valueExpression?.asIdentifier.name ?? '') + ')';
       }
-    } else if (valueExpression?.isNumericLiteral == true) {
-      naPaValue = valueExpression?.asNumericLiteral.value;
     } else if (valueExpression?.isStringLiteral == true) {
       naPaValue = valueExpression?.asStringLiteral.value;
-    } else if (valueExpression?.isBooleanLiteral == true) {
-      naPaValue = valueExpression?.asBooleanLiteral.value;
     } else if (valueExpression?.isPrefixedIdentifier == true) {
       if (RegExp(r'^[a-z_]') // widget.** 参数类的特殊处理成#(),兼容1期
               .hasMatch(valueExpression?.asPrefixedIdentifier.prefix ?? '') &&
@@ -221,26 +214,6 @@ class DslGenerator extends GeneratorForAnnotation<DynaBlock> {
             (valueExpression?.asPrefixedIdentifier.identifier ?? '') +
             ')';
       }
-    } else if (valueExpression?.isPropertyAccess == true) {
-      if (valueExpression?.asPropertyAccess.expression != null &&
-          valueExpression?.asPropertyAccess.expression?.isPrefixedIdentifier ==
-              true) {
-        var prefixedIdentifier =
-            valueExpression?.asPropertyAccess.expression?.asPrefixedIdentifier;
-        naPaValue = '\$(${prefixedIdentifier?.prefix}' +
-            '.' +
-            '${prefixedIdentifier?.identifier}' +
-            '.' +
-            '${valueExpression?.asPropertyAccess.name})';
-      } else {
-        naPaValue = '';
-      }
-    } else if (valueExpression?.isMapLiteral == true) {
-      var retMap = <String, dynamic>{};
-      valueExpression?.asMapLiteral.elements?.forEach((key, value) {
-        retMap.putIfAbsent(key, () => _buildValueExpression(value));
-      });
-      naPaValue = retMap;
     } else if (valueExpression?.isListLiteral == true) {
       var widgetExpressionList = [];
       for (var itemWidgetExpression
