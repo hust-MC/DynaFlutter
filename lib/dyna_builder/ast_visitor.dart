@@ -180,9 +180,9 @@ class AstVisitor extends SimpleAstVisitor<Map> {
 
   /// 函数参数类型
   @override
-  Map? visitTypeName(TypeName node) {
+  Map? visitTypeName(NamedType node) {
     var name = node.name.name;
-    return {AstKey.NODE: AstName.TypeName.name, AstKey.NAME: name};
+    return {AstKey.NODE: AstName.NamedType.name, AstKey.NAME: name};
   }
 
   /// 返回数据定义
@@ -290,9 +290,9 @@ class AstVisitor extends SimpleAstVisitor<Map> {
   @override
   Map? visitInstanceCreationExpression(InstanceCreationExpression node) {
     Map? callee;
-    if (node.constructorName.type.name is PrefixedIdentifier) {
+    if (node.constructorName.type2.name is PrefixedIdentifier) {
       var prefixedIdentifier =
-          node.constructorName.type.name as PrefixedIdentifier;
+          node.constructorName.type2.name as PrefixedIdentifier;
       callee = {
         AstKey.NODE: AstName.MemberExpression.name,
         AstKey.OBJECT: prefixedIdentifier.prefix.accept(this),
@@ -300,7 +300,7 @@ class AstVisitor extends SimpleAstVisitor<Map> {
       };
     } else {
       //如果不是simpleIdentif 需要特殊处理
-      callee = node.constructorName.type.name.accept(this);
+      callee = node.constructorName.type2.name.accept(this);
     }
     var argumentList = node.argumentList.accept(this);
     return {
@@ -333,13 +333,13 @@ class AstVisitor extends SimpleAstVisitor<Map> {
   Map? visitImplementsClause(ImplementsClause node) {
     return {
       AstKey.NODE: AstKey.IMPLEMENTS_CLAUSE,
-      AstKey.IMPLEMENTS: accept(node.interfaces, this)
+      AstKey.IMPLEMENTS: accept(node.interfaces2, this)
     };
   }
 
   @override
   Map? visitExtendsClause(ExtendsClause node) {
-    return node.superclass.accept(this);
+    return node.superclass2.accept(this);
   }
 
   @override

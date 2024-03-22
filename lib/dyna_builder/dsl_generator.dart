@@ -10,7 +10,6 @@ import 'ast_visitor.dart';
 import 'dyna_block.dart';
 import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:build/build.dart';
-import 'fair_ast_logic_unit.dart';
 import 'utils/file_utils.dart';
 
 class DslGenerator extends GeneratorForAnnotation<DynaBlock> {
@@ -45,18 +44,18 @@ class DslGenerator extends GeneratorForAnnotation<DynaBlock> {
     for (var body in bodyList!) {
       if (body?.type == AstName.ClassDeclaration.name) {
         var classBodyList = body!.toClassDeclaration.body;
-        for (var bodyNode in classBodyList!) {
-          if (bodyNode?.type == AstName.MethodDeclaration.name) {
-            var buildBodyReturn = bodyNode?.toMethodDeclaration.body?.body;
-            print("MCLOG==== Current buildBodyReturn: $buildBodyReturn");
+        for (var classNode in classBodyList!) {
+          if (classNode?.type == AstName.MethodDeclaration.name) {
+            var methodBody = classNode?.toMethodDeclaration.body?.body;
+            print("MCLOG==== Current buildBodyReturn: $methodBody");
 
-            if (buildBodyReturn?.isNotEmpty == true &&
-                buildBodyReturn?.last?.type == AstName.ReturnStatement.name &&
-                buildBodyReturn?.last?.toReturnStatement.argument != null) {
-              if (bodyNode?.toMethodDeclaration.name == 'build') {
-                print("MCLOG==== buildBodyReturn last: ${buildBodyReturn?.last}");
+            if (methodBody?.isNotEmpty == true &&
+                methodBody?.last?.type == AstName.ReturnStatement.name &&
+                methodBody?.last?.toReturnStatement.argument != null) {
+              if (classNode?.toMethodDeclaration.name == 'build') {
+                print("MCLOG==== buildBodyReturn last: ${methodBody?.last}");
 
-                tmpMap = _buildDsl(buildBodyReturn?.last?.toReturnStatement.argument);
+                tmpMap = _buildDsl(methodBody?.last?.toReturnStatement.argument);
                 var encoder = const JsonEncoder.withIndent('  ');
 
                 result = encoder.convert(tmpMap);
@@ -168,33 +167,33 @@ class DslGenerator extends GeneratorForAnnotation<DynaBlock> {
   dynamic _buildValueExpression(Expression? valueExpression) {
     print('MCLOG==== _buildValueExpression: $valueExpression');
 
-    var naPaValue;
+    var nameParams;
 
     if (valueExpression?.type == AstName.Identifier.name) {
-      naPaValue = '@(${valueExpression?.toIdentifier.name ?? ''})';
+      nameParams = '@(${valueExpression?.toIdentifier.name ?? ''})';
     } else if (valueExpression?.type == AstName.StringLiteral.name) {
-      naPaValue = valueExpression?.toStringLiteral.value;
+      nameParams = valueExpression?.toStringLiteral.value;
     } else if (valueExpression?.type == AstName.PrefixedIdentifier.name) {
-      naPaValue =
+      nameParams =
           '#(${valueExpression?.toPrefixedIdentifier.prefix ?? ''}.${valueExpression?.toPrefixedIdentifier.identifier ?? ''})';
     } else if (valueExpression?.type == AstName.ListLiteral.name) {
       var widgetExpressionList = [];
       for (var itemWidgetExpression in valueExpression!.toListLiteral.elements!) {
         widgetExpressionList.add(_buildValueExpression(itemWidgetExpression));
       }
-      naPaValue = widgetExpressionList;
+      nameParams = widgetExpressionList;
     } else if (valueExpression?.type == AstName.FunctionExpression.name) {
-      naPaValue = '';
+      nameParams = '';
       if (valueExpression?.toFunctionExpression.body != null &&
           valueExpression?.toFunctionExpression.body?.body?.isNotEmpty == true) {
-        naPaValue = _buildValueExpression(valueExpression?.toFunctionExpression.body?.body?.last);
+        nameParams = _buildValueExpression(valueExpression?.toFunctionExpression.body?.body?.last);
       }
     } else if (valueExpression?.type == AstName.ReturnStatement.name) {
-      naPaValue = _buildValueExpression(valueExpression?.toReturnStatement.argument);
+      nameParams = _buildValueExpression(valueExpression?.toReturnStatement.argument);
     } else {
       print('MCLOG===== _buildValueExpression else : $valueExpression');
-      naPaValue = _buildDsl(valueExpression);
+      nameParams = _buildDsl(valueExpression);
     }
-    return naPaValue;
+    return nameParams;
   }
 }

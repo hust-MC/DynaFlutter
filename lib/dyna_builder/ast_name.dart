@@ -12,7 +12,7 @@ enum AstName {
   BlockStatement,
   FormalParameterList,
   SimpleFormalParameter,
-  TypeName,
+  NamedType,
   ClassDeclaration,
   FunctionDeclaration,
   MethodDeclaration,

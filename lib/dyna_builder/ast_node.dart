@@ -142,27 +142,27 @@ class MemberExpression extends AstNode {
 }
 
 class SimpleFormalParameter extends AstNode {
-  TypeName? paramType;
+  NamedType? paramType;
   String? name;
 
   SimpleFormalParameter(this.paramType, this.name, {Map? ast}) : super(ast: ast);
 
   static SimpleFormalParameter? fromAst(Map? ast) {
     if (ast != null && ast[AstKey.NODE] == AstName.SimpleFormalParameter.name) {
-      return SimpleFormalParameter(TypeName.fromAst(ast['paramType']), ast[AstKey.NAME], ast: ast);
+      return SimpleFormalParameter(NamedType.fromAst(ast['paramType']), ast[AstKey.NAME], ast: ast);
     }
     return null;
   }
 }
 
-class TypeName extends AstNode {
+class NamedType extends AstNode {
   String? name;
 
-  TypeName(this.name, {Map? ast}) : super(ast: ast);
+  NamedType(this.name, {Map? ast}) : super(ast: ast);
 
-  static TypeName? fromAst(Map? ast) {
-    if (ast != null && ast[AstKey.NODE] == 'TypeName') {
-      return TypeName(ast[AstKey.NAME], ast: ast);
+  static NamedType? fromAst(Map? ast) {
+    if (ast != null && ast[AstKey.NODE] == AstName.NamedType.name) {
+      return NamedType(ast[AstKey.NAME], ast: ast);
     }
     return null;
   }
@@ -194,7 +194,7 @@ class MethodDeclaration extends AstNode {
   bool? isAsync;
   List<Annotation?>? annotationList;
   String? source;
-  TypeName? returnType;
+  NamedType? returnType;
 
   MethodDeclaration(
       this.name, this.parameterList, this.body, this.annotationList, this.returnType, this.source,
@@ -218,7 +218,7 @@ class MethodDeclaration extends AstNode {
       var name = Identifier.fromAst(ast['id'])?.name;
       FairLogicUnit().addFunction(name);
       return MethodDeclaration(name, parameters, BlockStatement.fromAst(ast[AstKey.BODY]),
-          annotations, TypeName.fromAst(ast['returnType']), ast['source'],
+          annotations, NamedType.fromAst(ast['returnType']), ast['source'],
           isAsync: ast['isAsync'] as bool, ast: ast);
     }
     return null;
@@ -397,7 +397,7 @@ class ClassDeclaration extends AstNode {
         bodies.add(Expression.fromAst(arg));
       }
       return ClassDeclaration(
-          Identifier.fromAst(ast['id'])?.name, TypeName.fromAst(ast['superClause'])?.name, bodies,
+          Identifier.fromAst(ast['id'])?.name, NamedType.fromAst(ast['superClause'])?.name, bodies,
           ast: ast);
     }
     return null;
