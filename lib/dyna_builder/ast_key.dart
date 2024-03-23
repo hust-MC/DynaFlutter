@@ -7,11 +7,14 @@ class AstKey {
   static const ARGUMENT = 'argument';
   static const PREFIX = 'prefix';
   static const OPERATOR = 'operator';
-  static const TYPE_ANNOTATION = 'typeAnnotation';
+  static const TYPE = 'type';
   static const DECLARATIONS = 'declarations';
+  static const VARIABLES = 'variables';
   static const ANNOTATIONS = 'annotations';
   static const SOURCE = 'source';
   static const BODY = 'body';
+  static const MEMBERS = 'members';
+  static const STATEMENTS = 'statements';
   static const INIT = 'init';
   static const NAME = 'name';
   static const EXPRESSION = 'expression';
@@ -26,9 +29,9 @@ class AstKey {
   static const PROPERTY = 'property';
   static const CALLEE = 'callee';
   static const TYPE_ARGUMENTS = 'typeArguments';
-  static const SUPER_CLAUSE = 'superClause';
+  static const EXTENDS_CLAUSE = 'extendsClause';
   static const IMPLEMENTS_CLAUSE = 'implementsClause';
-  static const MIXIN_CLAUSE = 'mixinClause';
+  static const WITH_CLAUSE = 'withClause';
   static const METADATA = 'metadata';
   static const VALUE = 'value';
   static const IMPLEMENTS = 'implements';

@@ -175,8 +175,8 @@ class BlockStatement extends AstNode {
   BlockStatement(this.body, {Map? ast}) : super(ast: ast);
 
   static BlockStatement? fromAst(Map? ast) {
-    if (ast != null && ast[AstKey.NODE] == AstName.BlockStatement.name) {
-      var astBody = ast[AstKey.BODY] as List;
+    if (ast != null && ast[AstKey.NODE] == AstName.Block.name) {
+      var astBody = ast[AstKey.STATEMENTS] as List;
       var bodies = <Expression?>[];
       for (var arg in astBody) {
         bodies.add(Expression.fromAst(arg));
@@ -254,10 +254,9 @@ class MethodInvocation extends AstNode {
   MethodInvocation(this.callee, this.argumentList, {Map? ast}) : super(ast: ast);
 
   static MethodInvocation? fromAst(Map? ast) {
+    print("MCLOG==== ast_node MethodInvocation: $ast");
     if (ast != null && ast[AstKey.NODE] == AstName.MethodInvocation.name) {
-      return MethodInvocation(
-          Expression.fromAst(ast['callee']), _parseArgumentList(ast['argumentList']),
-          ast: ast);
+      return MethodInvocation(Expression.fromAst(ast['callee']), _parseArgumentList(ast['argumentList']), ast: ast);
     }
     return null;
   }
@@ -314,7 +313,7 @@ class VariableDeclarator extends AstNode {
   VariableDeclarator(this.name, this.init, {Map? ast}) : super(ast: ast);
 
   static VariableDeclarator? fromAst(Map? ast) {
-    if (ast != null && ast[AstKey.NODE] == AstName.VariableDeclarator.name) {
+    if (ast != null && ast[AstKey.NODE] == AstName.VariableDeclaration.name) {
       var name = Identifier.fromAst(ast['id'])?.name;
       FairLogicUnit().addVariable(name);
       return VariableDeclarator(name, Expression.fromAst(ast['init']), ast: ast);
@@ -336,20 +335,20 @@ class VariableDeclarationList extends AstNode {
       : super(ast: ast);
 
   static VariableDeclarationList? fromAst(Map? ast) {
-    if (ast != null && ast[AstKey.NODE] == AstName.VariableDeclarationList) {
-      var astDeclarations = ast['declarations'] as List;
+    if (ast != null && ast[AstKey.NODE] == AstName.VariableDeclarationList.name) {
+      var astDeclarations = ast[AstKey.VARIABLES] as List;
       var declarations = <VariableDeclarator?>[];
       for (var arg in astDeclarations) {
         declarations.add(VariableDeclarator.fromAst(arg));
       }
-      var astAnnotations = ast['annotations'] as List;
+      var astAnnotations = ast[AstKey.ANNOTATIONS] as List;
       var annotations = <Annotation?>[];
       for (var annotation in astAnnotations) {
         annotations.add(Annotation.fromAst(annotation));
       }
 
       return VariableDeclarationList(
-          Identifier.fromAst(ast['typeAnnotation'])?.name, declarations, annotations, ast['source'],
+          Identifier.fromAst(ast[AstKey.TYPE])?.name, declarations, annotations, ast[AstKey.SOURCE],
           ast: ast);
     }
     return null;
@@ -391,13 +390,13 @@ class ClassDeclaration extends AstNode {
 
   static ClassDeclaration? fromAst(Map? ast) {
     if (ast != null && ast[AstKey.NODE] == AstName.ClassDeclaration.name) {
-      var astBody = ast[AstKey.BODY] as List;
-      var bodies = <Expression?>[];
-      for (var arg in astBody) {
-        bodies.add(Expression.fromAst(arg));
+      var astMembers = ast[AstKey.MEMBERS] as List;
+      var member = <Expression?>[];
+      for (var arg in astMembers) {
+        member.add(Expression.fromAst(arg));
       }
       return ClassDeclaration(
-          Identifier.fromAst(ast['id'])?.name, NamedType.fromAst(ast['superClause'])?.name, bodies,
+          Identifier.fromAst(ast[AstKey.ID])?.name, NamedType.fromAst(ast[AstKey.EXTENDS_CLAUSE])?.name, member,
           ast: ast);
     }
     return null;
@@ -424,6 +423,7 @@ class StringInterpolation extends AstNode {
   StringInterpolation(this.sourceString, {Map? ast}) : super(ast: ast);
 
   static StringInterpolation? fromAst(Map? ast) {
+    print("MCLOG==== ast_node StringInterpolation： $ast");
     if (ast != null && ast[AstKey.NODE] == AstName.StringInterpolation.name) {
       return StringInterpolation(ast[AstKey.SOURCE_STRING], ast: ast);
     }
@@ -515,7 +515,7 @@ class Expression extends AstNode {
       expression = FunctionDeclaration.fromAst(ast);
     } else if (astType == AstName.PrefixExpression.name) {
       expression = PrefixExpression.fromAst(ast);
-    } else if (astType == AstName.StringInterpolation) {
+    } else if (astType == AstName.StringInterpolation.name) {
       expression = StringInterpolation.fromAst(ast);
     } else {
       return null;
@@ -562,11 +562,15 @@ class Expression extends AstNode {
 
 ///解析ArgumentList 字段
 List<Expression?> _parseArgumentList(Map? ast) {
+  print("MCLOG==== ast_node _parseArgumentList: $ast");
+
   var arguments = <Expression?>[];
   if (ast != null) {
     var astArguments = ast['argumentList'] as List?;
     if (astArguments != null) {
       for (var arg in astArguments) {
+        print("MCLOG==== ast_node _parseArgumentList in astArguments: $arg");
+
         arguments.add(Expression.fromAst(arg));
       }
     }

@@ -1,6 +1,5 @@
 import 'package:dyna_flutter/dyna_builder/dyna_block.dart';
 import 'package:flutter/material.dart';
-import 'dyna_builder/dyna_block.dart';
 import 'dyna/dyna_widget.dart';
 
 void main() {
@@ -27,7 +26,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: DynaWidget(src: 'assets/dyna/main.json'),
+      home: DynaWidget(src: 'assets/dyna/main.dyna.json'),
     );
   }
 }
@@ -110,9 +109,8 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+        onPressed: (){},
+        child: const Icon(IconData(0xe047, fontFamily: 'MaterialIcons')),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }

@@ -43,8 +43,8 @@ class DslGenerator extends GeneratorForAnnotation<DynaBlock> {
     var result = '';
     for (var body in bodyList!) {
       if (body?.type == AstName.ClassDeclaration.name) {
-        var classBodyList = body!.toClassDeclaration.body;
-        for (var classNode in classBodyList!) {
+        var classList = body!.toClassDeclaration.body;
+        for (var classNode in classList!) {
           if (classNode?.type == AstName.MethodDeclaration.name) {
             var methodBody = classNode?.toMethodDeclaration.body?.body;
             print("MCLOG==== Current buildBodyReturn: $methodBody");
@@ -79,13 +79,9 @@ class DslGenerator extends GeneratorForAnnotation<DynaBlock> {
     print("MCLOG==== _buildWidgetDsl widgetExpression: $widgetExpression");
 
     var methodInvocationExpression = widgetExpression?.toMethodInvocation;
-    print("MCLOG==== methodInvocationExpression: $methodInvocationExpression");
 
     //普通类
     if (methodInvocationExpression?.callee?.type == AstName.Identifier.name) {
-      print(
-          'MCLOG==== isIdentifier name : ${methodInvocationExpression?.callee?.toIdentifier.name}');
-
       //注册的方法不再使用className
       // if (fairDslContex?.methodAnnotation
       //     .containsKey(methodInvocationExpression?.callee?.asIdentifier.name)==true) {
@@ -190,7 +186,17 @@ class DslGenerator extends GeneratorForAnnotation<DynaBlock> {
       }
     } else if (valueExpression?.type == AstName.ReturnStatement.name) {
       nameParams = _buildValueExpression(valueExpression?.toReturnStatement.argument);
-    } else {
+    } else if (valueExpression?.type == AstName.StringInterpolation.name) {
+      var sourceString = valueExpression?.toStringInterpolation.sourceString??'';
+      if (sourceString.length >= 2) {
+        if (sourceString.startsWith('\'') && sourceString.endsWith('\'') ||
+            sourceString.startsWith('\"') && sourceString.endsWith('\"')) {
+          sourceString = sourceString.substring(1, sourceString.length - 1);
+        }
+      }
+      nameParams = '#($sourceString)';
+    }
+    else {
       print('MCLOG===== _buildValueExpression else : $valueExpression');
       nameParams = _buildDsl(valueExpression);
     }

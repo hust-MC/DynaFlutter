@@ -39,7 +39,7 @@ class DynaState extends State<DynaWidget> {
     return _resolveWidget(widgetTree);
   }
 
-  Widget _resolveWidget(Map source) {
+  dynamic _resolveWidget(Map source) {
     print("MCLOG ==== source: $source");
     if (source.isEmpty) {
       return Text('Error');
@@ -89,9 +89,5 @@ class DynaState extends State<DynaWidget> {
       });
     }
     return nameParams;
-  }
-
-  bool _isWidget(Map widget) {
-    return widget.containsKey('widget');
   }
 }

@@ -41,17 +41,28 @@ class AstVisitor extends SimpleAstVisitor<Map> {
   }
 
   @override
+  Map? visitPrefixedIdentifier(PrefixedIdentifier node) {
+    var identifier = node.identifier.accept(this);
+    var prefix = node.prefix.accept(this);
+    return {
+      AstKey.NODE: AstName.PrefixedIdentifier.name,
+      AstKey.IDENTIFIER: identifier,
+      AstKey.PREFIX: prefix,
+    };
+  }
+
+  @override
   //node.fields子节点类型 VariableDeclarationList
   Map? visitFieldDeclaration(FieldDeclaration node) {
-    var typeAnnotation = node.fields.type?.accept(this);
-    var declarations = accept(node.fields.variables, this);
+    var type = node.fields.type?.accept(this);
+    var variables = accept(node.fields.variables, this);
     var annotations = accept(node.metadata, this);
     var source = node.toSource();
 
     return {
       AstKey.NODE: AstName.VariableDeclarationList.name,
-      AstKey.TYPE_ANNOTATION: typeAnnotation,
-      AstKey.DECLARATIONS: declarations,
+      AstKey.TYPE: type,
+      AstKey.VARIABLES: variables,
       AstKey.ANNOTATIONS: annotations,
       AstKey.SOURCE: source
     };
@@ -73,8 +84,8 @@ class AstVisitor extends SimpleAstVisitor<Map> {
 
   @override
   Map? visitBlock(Block node) {
-    var body = accept(node.statements, this);
-    return {AstKey.NODE: AstName.BlockStatement.name, AstKey.BODY: body};
+    var statements = accept(node.statements, this);
+    return {AstKey.NODE: AstName.Block.name, AstKey.STATEMENTS: statements};
   }
 
   /// 变量声明
@@ -83,7 +94,7 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     var id = node.name.accept(this);
     var init = node.initializer?.accept(this);
     return {
-      AstKey.NODE: AstName.VariableDeclarator.name,
+      AstKey.NODE: AstName.VariableDeclaration.name,
       AstKey.ID: id,
       AstKey.INIT: init,
     };
@@ -92,15 +103,15 @@ class AstVisitor extends SimpleAstVisitor<Map> {
   /// 变量声明列表
   @override
   Map? visitVariableDeclarationList(VariableDeclarationList node) {
-    var typeAnnotation = node.type?.accept(this);
-    var declarations = accept(node.variables, this);
+    var type = node.type?.accept(this);
+    var variables = accept(node.variables, this);
     var annotations = accept(node.metadata, this);
     var source = node.toSource();
 
     return {
       AstKey.NODE: AstName.VariableDeclarationList.name,
-      AstKey.TYPE_ANNOTATION: typeAnnotation,
-      AstKey.DECLARATIONS: declarations,
+      AstKey.TYPE: type,
+      AstKey.VARIABLES: variables,
       AstKey.ANNOTATIONS: annotations,
       AstKey.SOURCE: source
     };
@@ -131,17 +142,6 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     return node.functionDeclaration.accept(this);
   }
 
-  //()=>方法
-  /// 代码块
-  @override
-  Map? visitExpressionFunctionBody(ExpressionFunctionBody node) {
-    var body = node.expression.accept(this);
-    return {
-      AstKey.NODE: AstName.BlockStatement.name,
-      AstKey.BODY: [body]
-    };
-  }
-
   /// 函数表达式
   @override
   Map? visitFunctionExpression(FunctionExpression node) {
@@ -156,25 +156,13 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     };
   }
 
-  @override
-  Map? visitSimpleFormalParameter(SimpleFormalParameter node) {
-    var type = node.type?.accept(this);
-    var name = node.identifier?.name;
-
-    return {
-      AstKey.NODE: AstName.SimpleFormalParameter.name,
-      AstKey.PARAM_TYPE: type,
-      AstKey.NAME: name
-    };
-  }
-
   //函数参数列表
   @override
   Map? visitFormalParameterList(FormalParameterList node) {
-    var parameterList = accept(node.parameters, this);
+    var parameters = accept(node.parameters, this);
     return {
       AstKey.NODE: AstName.FormalParameterList.name,
-      AstKey.PARAMETER_LIST: parameterList
+      AstKey.PARAMETERS: parameters
     };
   }
 
@@ -183,16 +171,6 @@ class AstVisitor extends SimpleAstVisitor<Map> {
   Map? visitTypeName(NamedType node) {
     var name = node.name.name;
     return {AstKey.NODE: AstName.NamedType.name, AstKey.NAME: name};
-  }
-
-  /// 返回数据定义
-  @override
-  Map? visitReturnStatement(ReturnStatement node) {
-    var argument = node.expression?.accept(this);
-    return {
-      AstKey.NODE: AstName.ReturnStatement.name,
-      AstKey.ARGUMENT: argument,
-    };
   }
 
   ///方法声明
@@ -232,17 +210,6 @@ class AstVisitor extends SimpleAstVisitor<Map> {
   }
 
   @override
-  Map? visitPrefixedIdentifier(PrefixedIdentifier node) {
-    var identifier = node.identifier.accept(this);
-    var prefix = node.prefix.accept(this);
-    return {
-      AstKey.NODE: AstName.PrefixedIdentifier.name,
-      AstKey.IDENTIFIER: identifier,
-      AstKey.PREFIX: prefix,
-    };
-  }
-
-  @override
   Map? visitMethodInvocation(MethodInvocation node) {
     Map? callee;
     if (node.target != null) {
@@ -271,19 +238,19 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     print("MCLOG====visitClassDeclaration: ${node.name}");
 
     var id = node.name.accept(this);
-    var superClause = node.extendsClause?.accept(this);
+    var extendsClause = node.extendsClause?.accept(this);
     var implementsClause = node.implementsClause?.accept(this);
-    var mixinClause = node.withClause?.accept(this);
+    var withClause = node.withClause?.accept(this);
     var metadata = accept(node.metadata, this);
-    var body = accept(node.members, this);
+    var members = accept(node.members, this);
     return {
       AstKey.NODE: AstName.ClassDeclaration.name,
       AstKey.ID: id,
-      AstKey.SUPER_CLAUSE: superClause,
+      AstKey.EXTENDS_CLAUSE: extendsClause,
       AstKey.IMPLEMENTS_CLAUSE: implementsClause,
-      AstKey.MIXIN_CLAUSE: mixinClause,
+      AstKey.WITH_CLAUSE: withClause,
+      AstKey.MEMBERS: members,
       AstKey.METADATA: metadata,
-      AstKey.BODY: body,
     };
   }
 
@@ -322,14 +289,6 @@ class AstVisitor extends SimpleAstVisitor<Map> {
   }
 
   @override
-  Map? visitArgumentList(ArgumentList node) {
-    return {
-      AstKey.NODE: AstName.ArgumentList.name,
-      AstKey.ARGUMENT_LIST: accept(node.arguments, this)
-    };
-  }
-
-  @override
   Map? visitImplementsClause(ImplementsClause node) {
     return {
       AstKey.NODE: AstKey.IMPLEMENTS_CLAUSE,
@@ -347,9 +306,62 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     return node.accept(this);
   }
 
+  // ======= 未添加
   @override
   Map? visitLabel(Label node) {
     return node.label.accept(this);
+  }
+
+  @override
+  Map? visitIntegerLiteral(IntegerLiteral node) {
+    if (node.literal.lexeme.toUpperCase().startsWith('0X')) {
+      print("MCLOG=== astVisitor  visitIntegerLiteral 0x: ${node.literal.lexeme}");
+      return {AstKey.NODE: AstName.StringLiteral.name, 'value': node.literal.lexeme};
+    } else {
+      print("MCLOG=== astVisitor  visitIntegerLiteral: ${node.value}");
+      return {AstKey.NODE: AstName.NumericLiteral.name, 'value': node.value};
+    }
+  }
+
+  //()=>方法
+  /// 代码块
+  @override
+  Map? visitExpressionFunctionBody(ExpressionFunctionBody node) {
+    var body = node.expression.accept(this);
+    return {
+      AstKey.NODE: AstName.BlockStatement.name,
+      AstKey.BODY: [body]
+    };
+  }
+
+  @override
+  Map? visitArgumentList(ArgumentList node) {
+    return {
+      AstKey.NODE: AstName.ArgumentList.name,
+      AstKey.ARGUMENT_LIST: accept(node.arguments, this)
+    };
+  }
+
+  @override
+  Map? visitSimpleFormalParameter(SimpleFormalParameter node) {
+    var type = node.type?.accept(this);
+    var name = node.identifier?.name;
+
+    return {
+      AstKey.NODE: AstName.SimpleFormalParameter.name,
+      AstKey.PARAM_TYPE: type,
+      AstKey.NAME: name
+    };
+  }
+
+  /// 返回数据定义
+  @override
+  Map? visitReturnStatement(ReturnStatement node) {
+    var argument = node.expression?.accept(this);
+    return {
+      AstKey.NODE: AstName.ReturnStatement.name,
+      AstKey.ARGUMENT: argument,
+    };
   }
 
   //===========可去======
