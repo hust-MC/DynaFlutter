@@ -1,8 +1,12 @@
 import 'package:dyna_flutter/dyna_builder/dyna_block.dart';
 import 'package:flutter/material.dart';
 import 'dyna/dyna_widget.dart';
+import 'dyna_builder/utils/dyna_utils.dart';
+import 'dyna_builder/utils/file_utils.dart';
 
-void main() {
+String _dynaFile = "";
+
+void main() async {
   runApp(const MyApp());
 }
 
@@ -26,7 +30,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: DynaWidget(src: 'assets/dyna/main.dyna.json'),
+      home: DynaWidget(),
     );
   }
 }
@@ -109,7 +113,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: (){},
+        onPressed: () {},
         child: const Icon(IconData(0xe047, fontFamily: 'MaterialIcons')),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );

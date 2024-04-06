@@ -43,16 +43,16 @@ class DslGenerator extends GeneratorForAnnotation<DynaBlock> {
     var result = '';
     for (var body in bodyList!) {
       if (body?.type == AstName.ClassDeclaration.name) {
-        var classList = body!.toClassDeclaration.body;
-        for (var classNode in classList!) {
-          if (classNode?.type == AstName.MethodDeclaration.name) {
-            var methodBody = classNode?.toMethodDeclaration.body?.body;
+        var members = body!.toClassDeclaration.body;
+        for (var member in members!) {
+          if (member?.type == AstName.MethodDeclaration.name) {
+            var methodBody = member?.toMethodDeclaration.body?.body;
             print("MCLOG==== Current buildBodyReturn: $methodBody");
 
             if (methodBody?.isNotEmpty == true &&
                 methodBody?.last?.type == AstName.ReturnStatement.name &&
                 methodBody?.last?.toReturnStatement.argument != null) {
-              if (classNode?.toMethodDeclaration.name == 'build') {
+              if (member?.toMethodDeclaration.name == 'build') {
                 print("MCLOG==== buildBodyReturn last: ${methodBody?.last}");
 
                 tmpMap = _buildDsl(methodBody?.last?.toReturnStatement.argument);

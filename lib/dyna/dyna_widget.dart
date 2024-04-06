@@ -1,14 +1,13 @@
 import 'dart:convert';
 
 import 'package:dyna_flutter/dyna/param_utils.dart';
-import 'package:flutter/services.dart';
+import 'package:dyna_flutter/widget/loading_screen.dart';
 import 'package:flutter/widgets.dart';
+import '../dyna_builder/utils/dyna_utils.dart';
 import 'widget_map.dart';
 
 class DynaWidget extends StatefulWidget {
-  String src;
-
-  DynaWidget({Key? key, required this.src});
+  DynaWidget({Key? key});
 
   @override
   State<StatefulWidget> createState() => DynaState();
@@ -20,7 +19,7 @@ class DynaState extends State<DynaWidget> {
   @override
   Widget build(BuildContext context) {
     print("MCLOG ==== build");
-    return _child ?? Text("Default");
+    return _child ?? LoadingScreen();
   }
 
   @override
@@ -32,10 +31,8 @@ class DynaState extends State<DynaWidget> {
   }
 
   Future<Widget?> _resolveResource() async {
-    String source = await rootBundle.loadString(widget.src);
-    print("MCLOG ==== source: $source");
+    String source = await getDynaSource() ?? "";
     var widgetTree = json.decode(source);
-    print("MCLOG ==== widgetTree: $widgetTree");
     return _resolveWidget(widgetTree);
   }
 

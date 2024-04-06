@@ -1,0 +1,58 @@
+{
+  "widget": "Scaffold",
+  "params": {
+    "name": {
+      "appBar": {
+        "widget": "AppBar",
+        "params": {
+          "name": {
+            "title": {
+              "widget": "Text",
+              "params": {
+                "pos": [
+                  "Flutter 动态化课程"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "body": {
+        "widget": "Center",
+        "params": {
+          "name": {
+            "child": {
+              "widget": "Column",
+              "params": {
+                "name": {
+                  "mainAxisAlignment": "MainAxisAlignment.center",
+                  "children": [
+                    {
+                      "widget": "Text",
+                      "params": {
+                        "pos": [
+                          "You have pushed the button this many times:"
+                        ]
+                      }
+                    },
+                    {
+                      "widget": "Text",
+                      "params": {
+                        "pos": [
+                          "Count"
+                        ],
+                        "name": {
+                          "style": "Theme.of(context).textTheme.headline4"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
