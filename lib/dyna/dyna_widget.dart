@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:dyna_flutter/dyna/param_utils.dart';
 import 'package:dyna_flutter/widget/loading_screen.dart';
 import 'package:flutter/widgets.dart';
-import '../dyna_builder/utils/dyna_utils.dart';
+import 'dyna_utils.dart';
 import 'widget_map.dart';
 
 class DynaWidget extends StatefulWidget {

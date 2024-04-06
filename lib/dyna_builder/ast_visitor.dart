@@ -24,31 +24,7 @@ class AstVisitor extends SimpleAstVisitor<Map> {
 
   @override
   Map? visitStringInterpolation(StringInterpolation node) {
-    return {
-      AstKey.NODE: AstName.StringInterpolation.name,
-      AstKey.SOURCE_STRING: node.toSource()
-    };
-  }
-
-  @override
-  Map? visitPostfixExpression(PostfixExpression node) {
-    return {
-      AstKey.NODE: AstName.PrefixExpression.name,
-      AstKey.ARGUMENT: node.operand.accept(this),
-      AstKey.PREFIX: false,
-      AstKey.OPERATOR: node.operator.toString()
-    };
-  }
-
-  @override
-  Map? visitPrefixedIdentifier(PrefixedIdentifier node) {
-    var identifier = node.identifier.accept(this);
-    var prefix = node.prefix.accept(this);
-    return {
-      AstKey.NODE: AstName.PrefixedIdentifier.name,
-      AstKey.IDENTIFIER: identifier,
-      AstKey.PREFIX: prefix,
-    };
+    return {AstKey.NODE: AstName.StringInterpolation.name, AstKey.SOURCE_STRING: node.toSource()};
   }
 
   @override
@@ -137,11 +113,6 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     };
   }
 
-  @override
-  Map? visitFunctionDeclarationStatement(FunctionDeclarationStatement node) {
-    return node.functionDeclaration.accept(this);
-  }
-
   /// 函数表达式
   @override
   Map? visitFunctionExpression(FunctionExpression node) {
@@ -160,17 +131,7 @@ class AstVisitor extends SimpleAstVisitor<Map> {
   @override
   Map? visitFormalParameterList(FormalParameterList node) {
     var parameters = accept(node.parameters, this);
-    return {
-      AstKey.NODE: AstName.FormalParameterList.name,
-      AstKey.PARAMETERS: parameters
-    };
-  }
-
-  /// 函数参数类型
-  @override
-  Map? visitTypeName(NamedType node) {
-    var name = node.name.name;
-    return {AstKey.NODE: AstName.NamedType.name, AstKey.NAME: name};
+    return {AstKey.NODE: AstName.FormalParameterList.name, AstKey.PARAMETERS: parameters};
   }
 
   ///方法声明
@@ -255,30 +216,6 @@ class AstVisitor extends SimpleAstVisitor<Map> {
   }
 
   @override
-  Map? visitInstanceCreationExpression(InstanceCreationExpression node) {
-    Map? callee;
-    if (node.constructorName.type2.name is PrefixedIdentifier) {
-      var prefixedIdentifier =
-          node.constructorName.type2.name as PrefixedIdentifier;
-      callee = {
-        AstKey.NODE: AstName.MemberExpression.name,
-        AstKey.OBJECT: prefixedIdentifier.prefix.accept(this),
-        AstKey.PROPERTY: prefixedIdentifier.identifier.accept(this),
-      };
-    } else {
-      //如果不是simpleIdentif 需要特殊处理
-      callee = node.constructorName.type2.name.accept(this);
-    }
-    var argumentList = node.argumentList.accept(this);
-    return {
-      AstKey.NODE: AstName.MethodInvocation.name,
-      AstKey.CALLEE: callee,
-      AstKey.TYPE_ARGUMENTS: null,
-      AstKey.ARGUMENT_LIST: argumentList,
-    };
-  }
-
-  @override
   Map? visitSimpleStringLiteral(SimpleStringLiteral node) {
     return {AstKey.NODE: AstName.StringLiteral.name, AstKey.VALUE: node.value};
   }
@@ -306,32 +243,9 @@ class AstVisitor extends SimpleAstVisitor<Map> {
     return node.accept(this);
   }
 
-  // ======= 未添加
   @override
   Map? visitLabel(Label node) {
     return node.label.accept(this);
-  }
-
-  @override
-  Map? visitIntegerLiteral(IntegerLiteral node) {
-    if (node.literal.lexeme.toUpperCase().startsWith('0X')) {
-      print("MCLOG=== astVisitor  visitIntegerLiteral 0x: ${node.literal.lexeme}");
-      return {AstKey.NODE: AstName.StringLiteral.name, 'value': node.literal.lexeme};
-    } else {
-      print("MCLOG=== astVisitor  visitIntegerLiteral: ${node.value}");
-      return {AstKey.NODE: AstName.NumericLiteral.name, 'value': node.value};
-    }
-  }
-
-  //()=>方法
-  /// 代码块
-  @override
-  Map? visitExpressionFunctionBody(ExpressionFunctionBody node) {
-    var body = node.expression.accept(this);
-    return {
-      AstKey.NODE: AstName.BlockStatement.name,
-      AstKey.BODY: [body]
-    };
   }
 
   @override
@@ -366,15 +280,132 @@ class AstVisitor extends SimpleAstVisitor<Map> {
 
   //===========可去======
 
-  // @override
-  // Map? visitExpressionStatement(ExpressionStatement node) {
-  //   return node.expression.accept(this);
-  // }
-  // @override
-  // Map? visitVariableDeclarationStatement(VariableDeclarationStatement node) {
-  //   return node.variables.accept(this);
-  // }
-  //
+  @override
+  Map? visitExpressionStatement(ExpressionStatement node) {
+    return node.expression.accept(this);
+  }
+  @override
+  Map? visitVariableDeclarationStatement(VariableDeclarationStatement node) {
+    return node.variables.accept(this);
+  }
+
+  @override
+  Map? visitPrefixedIdentifier(PrefixedIdentifier node) {
+    var identifier = node.identifier.accept(this);
+    var prefix = node.prefix.accept(this);
+    return {
+      AstKey.NODE: AstName.PrefixedIdentifier.name,
+      AstKey.IDENTIFIER: identifier,
+      AstKey.PREFIX: prefix,
+    };
+  }
+
+  @override
+  Map? visitFunctionDeclarationStatement(FunctionDeclarationStatement node) {
+    return node.functionDeclaration.accept(this);
+  }
+
+  /// 函数参数类型
+  @override
+  Map? visitTypeName(NamedType node) {
+    var name = node.name.name;
+    return {AstKey.NODE: AstName.NamedType.name, AstKey.NAME: name};
+  }
+
+  @override
+  Map? visitInstanceCreationExpression(InstanceCreationExpression node) {
+    Map? callee;
+    if (node.constructorName.type2.name is PrefixedIdentifier) {
+      var prefixedIdentifier = node.constructorName.type2.name as PrefixedIdentifier;
+      callee = {
+        AstKey.NODE: AstName.MemberExpression.name,
+        AstKey.OBJECT: prefixedIdentifier.prefix.accept(this),
+        AstKey.PROPERTY: prefixedIdentifier.identifier.accept(this),
+      };
+    } else {
+      //如果不是simpleIdentif 需要特殊处理
+      callee = node.constructorName.type2.name.accept(this);
+    }
+    var argumentList = node.argumentList.accept(this);
+    return {
+      AstKey.NODE: AstName.MethodInvocation.name,
+      AstKey.CALLEE: callee,
+      AstKey.TYPE_ARGUMENTS: null,
+      AstKey.ARGUMENT_LIST: argumentList,
+    };
+  }
+
+  @override
+  Map? visitIntegerLiteral(IntegerLiteral node) {
+    if (node.literal.lexeme.toUpperCase().startsWith('0X')) {
+      print("MCLOG=== astVisitor  visitIntegerLiteral 0x: ${node.literal.lexeme}");
+      return {AstKey.NODE: AstName.StringLiteral.name, 'value': node.literal.lexeme};
+    } else {
+      print("MCLOG=== astVisitor  visitIntegerLiteral: ${node.value}");
+      return {AstKey.NODE: AstName.NumericLiteral.name, 'value': node.value};
+    }
+  }
+
+  //()=>方法
+  /// 代码块
+  @override
+  Map? visitExpressionFunctionBody(ExpressionFunctionBody node) {
+    var body = node.expression.accept(this);
+    return {
+      AstKey.NODE: AstName.BlockStatement.name,
+      AstKey.BODY: [body]
+    };
+  }
+
+  @override
+  Map? visitMapLiteralEntry(MapLiteralEntry node) {
+    return {
+      AstKey.NODE: AstName.MapLiteralEntry.name,
+      AstKey.KEY: node.key.accept(this),
+      AstKey.VALUE: node.value.accept(this)
+    };
+  }
+
+  @override
+  Map? visitSetOrMapLiteral(SetOrMapLiteral node) {
+    var elements = accept(node.elements, this);
+
+    return {AstKey.NODE: AstName.SetOrMapLiteral.name, AstKey.ELEMENTS: elements};
+  }
+
+  @override
+  Map? visitInterpolationExpression(InterpolationExpression node) {
+    return {
+      AstKey.NODE: AstName.InterpolationExpression.name,
+      AstKey.EXPRESSION: node.expression.accept(this)
+    };
+  }
+
+  @override
+  Map? visitDoubleLiteral(DoubleLiteral node) {
+    return {AstKey.NODE: AstName.NumericLiteral.name, AstKey.VALUE: node.value};
+  }
+
+  @override
+  Map? visitBooleanLiteral(BooleanLiteral node) {
+    return {AstKey.NODE: AstName.BooleanLiteral.name, AstKey.VALUE: node.value};
+  }
+
+  @override
+  Map? visitPropertyAccess(PropertyAccess node) {
+    var expression = node.parent?.toSource();
+    return {AstKey.NODE: AstName.PropertyAccess.name, AstKey.EXPRESSION: expression};
+  }
+
+  @override
+  Map? visitPostfixExpression(PostfixExpression node) {
+    return {
+      AstKey.NODE: AstName.PrefixExpression.name,
+      AstKey.ARGUMENT: node.operand.accept(this),
+      AstKey.PREFIX: false,
+      AstKey.OPERATOR: node.operator.toString()
+    };
+  }
 
   List<Map> accept(elements, AstVisitor visitor) {
     List<Map> list = [];

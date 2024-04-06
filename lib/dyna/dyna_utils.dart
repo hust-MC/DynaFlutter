@@ -3,7 +3,9 @@ import 'package:http/http.dart';
 import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'file_utils.dart';
+import '../dyna_builder/utils/file_utils.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart';
 
 const httpUrl = 'http://192.168.10.3:8080';
 const versionPath = '$httpUrl/version';
@@ -77,4 +79,10 @@ Future<int> _getPatchVersion() async {
     print('[DynaFlutter] Failed to fetch version: ${response.reasonPhrase}');
     return 0;
   }
+}
+
+Future<File> getFilePath(String fileName) async {
+  var rootPath = await getApplicationDocumentsDirectory();
+
+  return File(join(rootPath.path, fileName)).create(recursive: true);
 }

@@ -34,5 +34,6 @@ class AstKey {
   static const WITH_CLAUSE = 'withClause';
   static const METADATA = 'metadata';
   static const VALUE = 'value';
+  static const KEY = 'key';
   static const IMPLEMENTS = 'implements';
 }

@@ -23,5 +23,10 @@ enum AstName {
   PrefixExpression,
   StringInterpolation,
   NumericLiteral,
+  BooleanLiteral,
+  MapLiteralEntry,
+  SetOrMapLiteral,
+  InterpolationExpression,
+  PropertyAccess,
   Unit
 }

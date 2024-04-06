@@ -1,7 +1,7 @@
 import 'package:dyna_flutter/dyna_builder/dyna_block.dart';
 import 'package:flutter/material.dart';
 import 'dyna/dyna_widget.dart';
-import 'dyna_builder/utils/dyna_utils.dart';
+import 'dyna/dyna_utils.dart';
 import 'dyna_builder/utils/file_utils.dart';
 
 String _dynaFile = "";
