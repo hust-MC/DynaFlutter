@@ -5,3 +5,11 @@ builders:
     build_extensions: { '.dart': [ '.dyna.json' ] }
     build_to: cache
     auto_apply: root_package
+    applies_builders: [":dynaJs"]
+    runs_before: [":dynaJs"]
+
+post_process_builders:
+  dynaJs:
+    import: "package:dyna_flutter/dyna_builder/js_builder.dart"
+    builder_factory:  "dynaJs"
+    input_extensions: [ ".dyna.json" ]

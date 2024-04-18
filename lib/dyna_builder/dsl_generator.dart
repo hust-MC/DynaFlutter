@@ -27,7 +27,7 @@ class DslGenerator extends GeneratorForAnnotation<DynaBlock> {
 
     temp.writeAsBytesSync(await buildStep.readAsBytes(buildStep.inputId));
     var compilationUnit =
-        parseFile(path: temp.path, featureSet: FeatureSet.fromEnableFlags([])).unit;
+        parseFile(path: temp.absolute.path, featureSet: FeatureSet.fromEnableFlags([])).unit;
     var ast = compilationUnit.accept(AstVisitor());
     var encoder = const JsonEncoder.withIndent('  ');
 
@@ -53,6 +53,7 @@ class DslGenerator extends GeneratorForAnnotation<DynaBlock> {
                 methodBody?.last?.type == AstName.ReturnStatement.name &&
                 methodBody?.last?.toReturnStatement.argument != null) {
               if (member?.toMethodDeclaration.name == 'build') {
+                print("MCLOG==== buildBodyReturn last: ${methodBody?.last}");
 
                 tmpMap = _buildDsl(methodBody?.last?.toReturnStatement.argument);
                 var encoder = const JsonEncoder.withIndent('  ');
@@ -75,7 +76,6 @@ class DslGenerator extends GeneratorForAnnotation<DynaBlock> {
     var dslMap = {};
     var posParamsMap = [];
     var nameParamsMap = {};
-
     var methodInvocationExpression = widgetExpression?.toMethodInvocation;
 
     //普通类
@@ -159,6 +159,8 @@ class DslGenerator extends GeneratorForAnnotation<DynaBlock> {
   }
 
   dynamic _buildValueExpression(Expression? valueExpression) {
+    print('MCLOG==== _buildValueExpression: $valueExpression');
+
     var nameParams;
 
     if (valueExpression?.type == AstName.Identifier.name) {
@@ -193,6 +195,7 @@ class DslGenerator extends GeneratorForAnnotation<DynaBlock> {
       nameParams = '#($sourceString)';
     }
     else {
+      print('MCLOG===== _buildValueExpression else : $valueExpression');
       nameParams = _buildDsl(valueExpression);
     }
     return nameParams;

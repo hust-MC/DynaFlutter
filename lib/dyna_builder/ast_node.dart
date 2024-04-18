@@ -49,7 +49,7 @@ class PrefixedIdentifier extends AstNode {
   static PrefixedIdentifier? fromAst(Map? ast) {
     if (ast != null && ast[AstKey.NODE] == AstName.PrefixedIdentifier.name) {
       return PrefixedIdentifier(
-          Identifier.fromAst(ast['identifier'])?.name, Identifier.fromAst(ast['prefix'])?.name,
+          Identifier.fromAst(ast[AstKey.IDENTIFIER])?.name, Identifier.fromAst(ast['prefix'])?.name,
           ast: ast);
     }
     return null;
@@ -256,7 +256,7 @@ class MethodInvocation extends AstNode {
   static MethodInvocation? fromAst(Map? ast) {
     print("MCLOG==== ast_node MethodInvocation: $ast");
     if (ast != null && ast[AstKey.NODE] == AstName.MethodInvocation.name) {
-      return MethodInvocation(Expression.fromAst(ast['callee']), _parseArgumentList(ast['argumentList']), ast: ast);
+      return MethodInvocation(Expression.fromAst(ast['callee']), _parseArgumentList(ast[AstKey.ARGUMENT_LIST]), ast: ast);
     }
     return null;
   }
@@ -277,7 +277,7 @@ class NamedExpression extends AstNode {
   static NamedExpression? fromAst(Map? ast) {
     if (ast != null && ast[AstKey.NODE] == AstName.NamedExpression.name) {
       return NamedExpression(
-          Identifier.fromAst(ast['id'])?.name, Expression.fromAst(ast[AstKey.EXPRESSION]),
+          Identifier.fromAst(ast[AstKey.ID])?.name, Expression.fromAst(ast[AstKey.EXPRESSION]),
           ast: ast);
     }
     return null;
@@ -314,7 +314,7 @@ class VariableDeclarator extends AstNode {
 
   static VariableDeclarator? fromAst(Map? ast) {
     if (ast != null && ast[AstKey.NODE] == AstName.VariableDeclaration.name) {
-      var name = Identifier.fromAst(ast['id'])?.name;
+      var name = Identifier.fromAst(ast[AstKey.ID])?.name;
       FairLogicUnit().addVariable(name);
       return VariableDeclarator(name, Expression.fromAst(ast['init']), ast: ast);
     }
@@ -726,7 +726,8 @@ String _parseStringValue(Map ast) {
 ///解析File 对象 ast
 File? parseFileObject(MethodInvocation fileMethod) {
   var callee = fileMethod.callee;
-  if (callee?._type == AstName.Identifier.name && callee?.toIdentifier.name == 'File') {
+  if (callee?._type == AstName.Identifier.name &&
+      callee?.toIdentifier.name == 'File') {
     var argumentList = fileMethod.argumentList;
     if (argumentList != null &&
         argumentList.isNotEmpty &&

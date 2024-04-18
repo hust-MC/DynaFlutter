@@ -4,6 +4,8 @@ import 'package:build/build.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:dyna_flutter/dyna_builder/dsl_generator.dart';
 
+import 'js_builder.dart';
+
 class DslBuilder extends Builder {
   Generator generator;
   DslBuilder(this.generator);
