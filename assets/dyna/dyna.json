@@ -10,7 +10,7 @@
               "widget": "Text",
               "params": {
                 "pos": [
-                  "Flutter 动态化课程"
+                  "Flutter动态化课堂"
                 ]
               }
             }
@@ -25,7 +25,7 @@
               "widget": "Column",
               "params": {
                 "name": {
-                  "mainAxisAlignment": "MainAxisAlignment.center",
+                  "mainAxisAlignment": "#(MainAxisAlignment.center)",
                   "children": [
                     {
                       "widget": "Text",
@@ -39,10 +39,26 @@
                       "widget": "Text",
                       "params": {
                         "pos": [
-                          "Count"
+                          "#($_counter)"
                         ],
                         "name": {
-                          "style": "Theme.of(context).textTheme.headline4"
+                          "style": {
+                            "widget": "TextStyle",
+                            "params": {
+                              "name": {
+                                "fontSize": 40,
+                                "color": {
+                                  "widget": "Color",
+                                  "params": {
+                                    "pos": [
+                                      "0xffeb4237"
+                                    ]
+                                  }
+                                },
+                                "wordSpacing": 0
+                              }
+                            }
+                          }
                         }
                       }
                     }

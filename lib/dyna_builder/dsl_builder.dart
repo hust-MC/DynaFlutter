@@ -17,7 +17,6 @@ class DslBuilder extends Builder {
     final library = await buildStep.inputLibrary;
 
     final generatedValue = await generator.generate(LibraryReader(library), buildStep);
-    print("MCLOG====[DslBuilder] generatedValue: $generatedValue");
     // 不为空，则说明有生成内容，需要写入文件
     if (generatedValue != null && generatedValue.isNotEmpty) {
       final outputId = buildStep.inputId.changeExtension('.dyna.json');

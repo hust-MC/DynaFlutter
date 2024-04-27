@@ -45,11 +45,18 @@ _checkDynaPatch() async {
 Future<String?> getDynaSource() async {
   await _checkDynaPatch();
 
+  var source = '';
+
   if (_dynaFile?.existsSync() == true) {
-    return await _dynaFile?.readAsString();
-  } else {
-    return await rootBundle.loadString(assetPath);
+    source = await _dynaFile?.readAsString() ?? '';
+    if (source.isNotEmpty) {
+      print('[DynaFlutter] getDynaSource from patch');
+
+      return source;
+    }
   }
+  print('[DynaFlutter] getDynaSource from local');
+  return await rootBundle.loadString(assetPath);
 }
 
 _fetchPatch() async {
@@ -60,23 +67,25 @@ _fetchPatch() async {
     await file?.writeAsBytes(bytes);
     print('[DynaFlutter] Patch file downloaded successfully');
   } else {
-    print('[DynaFlutter] Failed to download patch file: ${response.reasonPhrase}');
+    print(
+        '[DynaFlutter] Failed to download patch file: ${response.reasonPhrase}');
   }
 }
 
 Future<int> _getPatchVersion() async {
-  final response = await get(Uri.parse(versionPath));
-  if (response.statusCode == 200) {
-    final version = response.body;
-    print('[DynaFlutter] fetch version: $version');
-    try {
+  try {
+    final response =
+        await get(Uri.parse(versionPath)).timeout(const Duration(seconds: 10));
+    if (response.statusCode == 200) {
+      final version = response.body;
+      print('[DynaFlutter] fetch version: $version');
       return int.parse(version);
-    } catch (e) {
-      print('[DynaFlutter] server version exception: $e');
+    } else {
+      print('[DynaFlutter] Failed to fetch version: ${response.reasonPhrase}');
       return 0;
     }
-  } else {
-    print('[DynaFlutter] Failed to fetch version: ${response.reasonPhrase}');
+  } catch (e) {
+    print('[DynaFlutter] server version exception: $e');
     return 0;
   }
 }

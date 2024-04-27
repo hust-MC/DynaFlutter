@@ -535,6 +535,22 @@ class BooleanLiteral extends AstNode {
   Map? toAst() => _ast;
 }
 
+class NumericLiteral extends AstNode {
+  num? value;
+
+  NumericLiteral(this.value, {Map? ast}) : super(ast: ast);
+
+  static NumericLiteral? fromAst(Map? ast) {
+    if (ast != null && ast[AstKey.NODE] == AstName.NumericLiteral.name) {
+      return NumericLiteral(ast[AstKey.VALUE], ast: ast);
+    }
+    return null;
+  }
+
+  @override
+  Map? toAst() => _ast;
+}
+
 class PropertyAccess extends AstNode {
   String? expression;
 
@@ -605,6 +621,8 @@ class Expression extends AstNode {
       expression = StringInterpolation.fromAst(ast);
     } else if (astType == AstName.BooleanLiteral.name) {
       expression = BooleanLiteral.fromAst(ast);
+    } else if (astType == AstName.NumericLiteral.name) {
+      expression = NumericLiteral.fromAst(ast);
     } else if (astType == AstName.MapLiteralEntry.name) {
       expression = MapLiteralEntry.fromAst(ast);
     } else if (astType == AstName.SetOrMapLiteral.name) {
@@ -624,6 +642,8 @@ class Expression extends AstNode {
   PrefixedIdentifier get toPrefixedIdentifier => _expression as PrefixedIdentifier;
 
   StringLiteral get toStringLiteral => _expression as StringLiteral;
+
+  NumericLiteral get toNumericLiteral => _expression as NumericLiteral;
 
   ListLiteral get toListLiteral => _expression as ListLiteral;
 

@@ -101,18 +101,13 @@ class DslGenerator extends GeneratorForAnnotation<DynaBlock> {
             () =>
                 '${memberExpression?.object?.toIdentifier.name ?? ''}.${memberExpression?.property ?? ''}');
       } catch (e) {
-        // dslMap.putIfAbsent(
-        //     'className',
-        //         () =>
-        //     'Sugar' +
-        //         '.' +
-        //         'map');
         print(e);
       }
     } else {
+      print('MCLOG==== NULL: ${methodInvocationExpression?.callee?.type}');
+
       return null;
     }
-    print('MCLOG==== dslMap: $dslMap');
 
     //1.pa
     for (var arg in methodInvocationExpression!.argumentList!) {
@@ -165,6 +160,8 @@ class DslGenerator extends GeneratorForAnnotation<DynaBlock> {
 
     if (valueExpression?.type == AstName.Identifier.name) {
       nameParams = '@(${valueExpression?.toIdentifier.name ?? ''})';
+    } else if (valueExpression?.type == AstName.NumericLiteral.name) {
+      nameParams = valueExpression?.toNumericLiteral.value;
     } else if (valueExpression?.type == AstName.StringLiteral.name) {
       nameParams = valueExpression?.toStringLiteral.value;
     } else if (valueExpression?.type == AstName.PrefixedIdentifier.name) {

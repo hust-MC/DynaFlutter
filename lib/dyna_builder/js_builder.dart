@@ -26,7 +26,7 @@ class JsBuilder extends PostProcessBuilder {
             .replaceAll('/', '_')
             .replaceAll('\\', '_'));
     final jsName = bundleName.replaceFirst('.json', '.js');
-    await dart2JS(buildStep.inputId.path, "build/fair/lib_main.fair.js");
+    await dart2JS(buildStep.inputId.path, "build\\fair\\lib_main.fair.js");
 
   }
 

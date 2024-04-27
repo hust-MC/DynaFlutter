@@ -96,7 +96,7 @@ class WidgetStateGenerator extends RecursiveAstVisitor<WidgetStateGenerator> {
         node.extendsClause!.superclass.toString() == 'Object') {
       allInnerDataClasses.add(tempClassDeclaration);
     }
-    var fairPatchAttributeName = 'FairPatch';
+    var fairPatchAttributeName = 'DynaBlock';
     const statefulWidgetClassName = 'StatefulWidget';
     const statelessWidgetClassName = 'StatelessWidget';
     if (node.metadata.isNotEmpty &&

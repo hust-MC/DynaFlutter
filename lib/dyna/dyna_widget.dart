@@ -1,10 +1,11 @@
 import 'dart:convert';
 
+import 'package:dyna_flutter/dyna/param_resover.dart';
 import 'package:dyna_flutter/dyna/param_utils.dart';
 import 'package:dyna_flutter/widget/loading_screen.dart';
 import 'package:flutter/widgets.dart';
 import 'dyna_utils.dart';
-import 'widget_map.dart';
+import 'map/widget_map.dart';
 
 class DynaWidget extends StatefulWidget {
   DynaWidget({Key? key});
@@ -32,6 +33,8 @@ class DynaState extends State<DynaWidget> {
 
   Future<Widget?> _resolveResource() async {
     String source = await getDynaSource() ?? "";
+    print("MCLOG==== raw source: $source");
+
     var widgetTree = json.decode(source);
     return _resolveWidget(widgetTree);
   }
@@ -46,7 +49,7 @@ class DynaState extends State<DynaWidget> {
     var paramsMap = source['params'];
     var pp = _resolvePosParams(paramsMap['pos']);
     var np = _resolveNameParams(paramsMap['name']);
-    var widgetBlock = widgetMap[name];
+    Object Function(Params)? widgetBlock = widgetMap[name];
     print("MCLOG ==== widgetBlock: $widgetBlock; pp: $pp; np: $np; name: $name");
     var params = ParamUtils.transform(pp, np);
     print("MCLOG ==== params: $params");
@@ -80,6 +83,9 @@ class DynaState extends State<DynaWidget> {
           nameParams[key] = children;
         } else if (child is Map) {
           nameParams[key] = _resolveWidget(child);
+        } else if (child is String) {
+          var result = ParamResolver.resolve(child);
+          nameParams[key] = result ?? child;
         } else {
           nameParams[key] = child;
         }
@@ -87,4 +93,8 @@ class DynaState extends State<DynaWidget> {
     }
     return nameParams;
   }
+}
+
+dynamic _resolveEscape(String paramString) {
+
 }

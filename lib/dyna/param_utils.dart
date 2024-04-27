@@ -1,4 +1,4 @@
-import 'widget_map.dart';
+import 'map/widget_map.dart';
 
 class ParamUtils {
   static Params transform(List<dynamic>? pos, Map<String, dynamic>? name) {
