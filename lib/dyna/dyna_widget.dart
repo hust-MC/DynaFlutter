@@ -62,6 +62,9 @@ class DynaState extends State<DynaWidget> {
       params.forEach((element) {
         if (element is Map) {
           posParams.add(_resolveWidget(element));
+        } else if (element is String) {
+          var result = ParamResolver.resolve(element);
+          posParams.add(result ?? element);
         } else {
           posParams.add(element);
         }
@@ -93,8 +96,4 @@ class DynaState extends State<DynaWidget> {
     }
     return nameParams;
   }
-}
-
-dynamic _resolveEscape(String paramString) {
-
 }

@@ -10,9 +10,16 @@ abstract class ParamResolver {
   dynamic _resolveParams(String paramString);
 
   static dynamic resolve(String paramString) {
+    var param = paramString;
     for (var element in _resolverList) {
       if (element._checkResolver(paramString)) {
-        return element._resolveParams(paramString);
+        var result = element._resolveParams(paramString);
+        if (result != null) {
+          return result;
+        } else {
+        } else {
+          param = result;
+        }
       }
     }
     return null;
@@ -40,9 +47,27 @@ class PropertyResolver extends ParamResolver {
       print("MCLOG==== target: $target; object: $object; map: $map");
 
       if (map is Map) {
-        return map![object];
+        return map[object];
       }
     }
     return null;
   }
+}
+
+class InterpolationResolver extends ParamResolver {
+  @override
+  bool _checkResolver(String paramString) {
+    return  RegExp(r'\$\w+', multiLine: true).hasMatch(paramString ?? '');
+  }
+
+  @override
+  _resolveParams(String paramString) {
+    var regexp = RegExp(r'\$\w+');
+    var matches = regexp.allMatches(paramString ?? '');
+    var builder = _InlineVariableBuilder(
+        matches: matches, data: pre, proxyMirror: proxy, binding: binding);
+    binding?.addBindValue(builder);
+    return R(builder, exp: exp, needBinding: true);
+  }
+  
 }
