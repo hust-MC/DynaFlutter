@@ -2,10 +2,10 @@ import 'package:dyna_flutter/dyna/dyna_widget.dart';
 import 'package:dyna_flutter/dyna_builder/dyna_block.dart';
 import 'package:flutter/material.dart';
 
-String _dynaFile = "";
-
 void main() async {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+
+  runDyna(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -109,9 +109,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _incrementCounter();
-        },
+        onPressed: _incrementCounter,
         child: const Icon(IconData(0xe047, fontFamily: 'MaterialIcons')),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );

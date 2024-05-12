@@ -8,13 +8,12 @@ import 'package:analyzer/dart/analysis/features.dart';
 
 import 'generator/WidgetStateGenerator.dart';
 import 'generator/const.dart';
-import 'generator/helper.dart';
 
 class JsBuilder extends PostProcessBuilder {
   @override
   Future<FutureOr<void>> build(PostProcessBuildStep buildStep) async {
     print("MCLOG===== JsBuilder: ${buildStep.inputId.uri}");
-    final dir = join('build','fair');
+    final dir = join('build', 'fair');
     Directory(dir).createSync(recursive: true);
     var moduleNameKey = buildStep.inputId.path.replaceAll('.bundle.json', '');
 
@@ -27,12 +26,10 @@ class JsBuilder extends PostProcessBuilder {
             .replaceAll('\\', '_'));
     final jsName = bundleName.replaceFirst('.json', '.js');
     await dart2JS(buildStep.inputId.path, "build\\fair\\lib_main.fair.js");
-
   }
 
   @override
   Iterable<String> get inputExtensions => ['.dyna.json'];
-
 }
 
 Future dart2JS(String input, String jsName) async {
@@ -44,7 +41,7 @@ Future dart2JS(String input, String jsName) async {
     try {
       print(' [Fair Dart2JS] jsName => ${jsName} ');
 
-      var result = await convertFile(partPath, true);
+      var result = await convertFile(partPath);
       File(jsName).writeAsStringSync(result);
     } catch (e) {
       print('[Fair Dart2JS] e => ${e}');
@@ -52,20 +49,14 @@ Future dart2JS(String input, String jsName) async {
   }
 }
 
-Future<String> convertFile(String input, [bool compress = false]) async {
-  return convertWidgetStateFile(input, compress);
-}
-String convertWidgetStateFile(String filePath, [bool isCompressed = false]) {
-  var file = File(filePath);
-  var stateFilePath =
-  Platform.isWindows ? normalize(filePath) : file.absolute.uri.normalizePath().path;
-  var result = parseFile(
-      path: stateFilePath, featureSet: FeatureSet.fromEnableFlags([]));
+Future<String> convertFile(String filePath) async {
+  var stateFilePath = normalize(filePath);
+  var result = parseFile(path: stateFilePath, featureSet: FeatureSet.fromEnableFlags([]));
   var visitor = WidgetStateGenerator(stateFilePath);
   result.unit.visitChildren(visitor);
 
   transpileOption.modifySetState = true;
-  return isCompressed ? uglify(visitor.genJsCode()) : visitor.genJsCode();
+  return visitor.genJsCode();
 }
 
 PostProcessBuilder dynaJs(BuilderOptions options) {

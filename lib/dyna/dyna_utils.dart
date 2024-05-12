@@ -3,7 +3,6 @@ import 'package:http/http.dart';
 import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../dyna_builder/utils/file_utils.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
 
@@ -15,6 +14,12 @@ const spKeyVersion = 'version';
 
 const dynaFileName = 'dyna.json';
 const assetPath = 'assets/dyna/$dynaFileName';
+
+const dynaJSFileName = 'dyna.js';
+const assetJSPath = 'assets/dyna/$dynaJSFileName';
+
+const dynaBaseJsFileName = 'dyna_core.js';
+const assetsBaseJsPath = 'assets/dyna/$dynaBaseJsFileName';
 
 File? _dynaFile;
 
@@ -43,20 +48,24 @@ _checkDynaPatch() async {
 }
 
 Future<String?> getDynaSource() async {
-  await _checkDynaPatch();
+  // await _checkDynaPatch();
 
   var source = '';
 
-  if (_dynaFile?.existsSync() == true) {
-    source = await _dynaFile?.readAsString() ?? '';
-    if (source.isNotEmpty) {
-      print('[DynaFlutter] getDynaSource from patch');
-
-      return source;
-    }
-  }
+  // if (_dynaFile?.existsSync() == true) {
+  //   source = await _dynaFile?.readAsString() ?? '';
+  //   if (source.isNotEmpty) {
+  //     print('[DynaFlutter] getDynaSource from patch');
+  //
+  //     return source;
+  //   }
+  // }
   print('[DynaFlutter] getDynaSource from local');
   return await rootBundle.loadString(assetPath);
+}
+
+Future<String?> getDynaJsSource() async {
+  return await rootBundle.loadString(assetJSPath);
 }
 
 _fetchPatch() async {

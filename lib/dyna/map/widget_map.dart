@@ -15,8 +15,7 @@ const double kMinInteractiveDimensionCupertino = 44.0;
 const int defaultRowsPerPage = 10;
 const double _kOffset = 40.0; // distance to bottom of banner, at a 45 degree angle inwards
 const double _kHeight = 12.0; // height of banner
-const double _kBottomOffset = _kOffset + 0.707 * _kHeight; // offset plus sqrt(2)/2 * banner height
-const Rect _kRect = Rect.fromLTWH(-_kOffset, _kOffset - _kHeight, _kOffset * 2.0, _kHeight);
+// offset plus sqrt(2)/2 * banner height
 
 const Color _kColor = Color(0xA0B71C1C);
 const TextStyle _kTextStyle = TextStyle(
@@ -2472,7 +2471,7 @@ Map<String, Object Function(Params)> widgetMap = {
   ),
   'DefaultTextStyle.fallback': (Params params) => DefaultTextStyle.fallback(),
   'Text': (Params params) => Text(
-    params.posParam[0],
+    params.posParam[0].toString(),
     key: params.nameParam['key'],
     style: params.nameParam['style'],
     strutStyle: params.nameParam['strutStyle'],
