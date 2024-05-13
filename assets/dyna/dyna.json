@@ -68,6 +68,32 @@
             }
           }
         }
+      },
+      "floatingActionButton": {
+        "widget": "FloatingActionButton",
+        "params": {
+          "name": {
+            "onPressed": "@(_incrementCounter)",
+            "child": {
+              "widget": "Icon",
+              "params": {
+                "pos": [
+                  {
+                    "widget": "IconData",
+                    "params": {
+                      "pos": [
+                        "0xe047"
+                      ],
+                      "name": {
+                        "fontFamily": "MaterialIcons"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
       }
     }
   }
