@@ -23,7 +23,7 @@ runDyna(Widget app) async {
   map[KEY_PATH] = script;
   map[KEY_PAGE_NAME] = 'loadCoreJs';
 
-  FairMessageChannel().loadJS(jsonEncode(map), (msg) => "MCLOG=== runApp: $msg").then((value) => runApp(app));
+  DynaChannel().loadJS(jsonEncode(map), (msg) => "MCLOG=== runApp: $msg").then((value) => runApp(app));
 }
 
 class DynaWidget extends StatefulWidget {
@@ -35,12 +35,12 @@ class DynaWidget extends StatefulWidget {
 
 class DynaState extends State<DynaWidget> {
   Widget? _child;
-  FairMessageChannel? _channel;
+  DynaChannel? _channel;
 
   @override
   void initState() {
     super.initState();
-    _channel ??= FairMessageChannel();
+    _channel ??= DynaChannel();
     //接收setState()的信息
     _channel!.setMessageHandler((message) {
       var data = json.decode(message ?? '');

@@ -1,12 +1,9 @@
 import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:analyzer/error/error.dart';
-import '../ast_node/ArrowFunctionExpressionNode.dart';
-import '../ast_node/NewOperatorStatementNode.dart';
 import '../ast_node/statement_node.dart';
 import '../declaration/ClassDeclarationData.dart';
 import '../declaration/MethodDeclarationData.dart';
 import 'SimpleFunctionGenerator.dart';
-import 'package:analyzer/dart/ast/ast.dart';
 
 String convertExpression(String code) {
   // print("[convertExpression]" + code);
@@ -195,39 +192,6 @@ String removeCommaAsNeeded(String statement) {
     return statement;
   }
   return statement.substring(0, statement.lastIndexOf(';'));
-}
-
-
-NewOperatorStatementNode handleCreationCall( InstanceCreationExpression currentNode) {
-  var gnNode = NewOperatorStatementNode();
-  gnNode.methodName = currentNode.constructorName.toString();
-  currentNode.argumentList.arguments.forEach((arg) {
-    if (arg is NamedExpression) {
-      gnNode.namedParameters.add([
-        arg.name.label.toString(),
-        convertExpression(arg.expression.toString())
-      ]);
-    } else {
-      gnNode.unnamedParameters.add(convertExpression(arg.toString()));
-    }
-  });
-  return gnNode;
-}
-
-String convertArrayFuncExpression(FunctionExpression code) {
-  var body = code.body as ExpressionFunctionBody;
-  if (body.functionDefinition.toString() == '=>') {
-    var gnNode = ArrowFunctionExpressionNode();
-    // TODO: 支持命名参数、可选参数
-    code.parameters?.parameters.forEach((element) {
-      gnNode.argumentList.add([element.identifier.toString()]);
-    });
-    gnNode.body.push(
-        GenericStatementNode(convertExpression(body.expression.toString())));
-    return gnNode.toSource();
-  } else {
-    throw 'error';
-  }
 }
 
 String convertFunctionExpression(String code) {

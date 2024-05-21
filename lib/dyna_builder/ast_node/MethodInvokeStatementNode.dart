@@ -1,6 +1,7 @@
+import 'package:dyna_flutter/dyna_builder/ast_node/statement_node.dart';
+
 import '../generator/const.dart';
-import 'MemberAccessStatementNode.dart';
-class MethodInvokeStatementNode extends MemberAccessStatementNode {
+class MethodInvokeStatementNode extends StatementNode {
   String? methodName;
   List<String> unnamedParameters = [];
   List<List<String>> namedParameters = [];
@@ -19,19 +20,11 @@ class MethodInvokeStatementNode extends MemberAccessStatementNode {
       finalNamedParameters.write('}');
     }
 
-    if (thiz != null && thiz?.trim() == superSubstitution) {
-      var params =
-          '${unnamedParameters.join(',')}${finalNamedParameters.toString()}';
-      if (parentClassName == null || parentClassName!.isEmpty) {
-        return '';
-      }
-      return '$parentClassName.prototype.$methodName.call(this${params.isEmpty ? '' : ',$params'});';
-    }
     if (transpileOption.modifySetState && methodName == setStateMethodName) {
-      unnamedParameters.insert(0, "'$FairKeyPlaceholder'");
+      unnamedParameters.insert(0, "'$pageName'");
     }
     return '''
-    ${thiz != null && thiz!.isNotEmpty ? thiz! + '.' : ''}$methodName(${unnamedParameters.join(',')}${finalNamedParameters.toString()});
+    $methodName(${unnamedParameters.join(',')}${finalNamedParameters.toString()});
     ''';
   }
 }

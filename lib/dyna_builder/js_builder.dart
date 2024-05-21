@@ -13,19 +13,13 @@ class JsBuilder extends PostProcessBuilder {
   @override
   Future<FutureOr<void>> build(PostProcessBuildStep buildStep) async {
     print("MCLOG===== JsBuilder: ${buildStep.inputId.uri}");
-    final dir = join('build', 'fair');
+    final dir = join('build', 'dyna');
     Directory(dir).createSync(recursive: true);
-    var moduleNameKey = buildStep.inputId.path.replaceAll('.bundle.json', '');
+    var moduleName = buildStep.inputId.path.replaceAll('.dyna.json', '').replaceAll('/', '_').replaceAll('\\', '_');
 
-    final bundleName = join(
-        dir,
-        buildStep.inputId.path
-            .replaceAll(inputExtensions.first, '.fair.json')
-            .replaceAll('lib', 'MCMC')
-            .replaceAll('/', '_')
-            .replaceAll('\\', '_'));
-    final jsName = bundleName.replaceFirst('.json', '.js');
-    await dart2JS(buildStep.inputId.path, "build/fair/lib_main.fair.js");
+    final jsExtension = inputExtensions.first.replaceFirst('.json', '.js');
+    final jsPath = join(dir, moduleName + jsExtension);
+    await dart2JS(buildStep.inputId.path, jsPath);
   }
 
   @override

@@ -3,21 +3,9 @@ import 'dart:collection';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 
-import '../ast_node/ArrowFunctionExpressionNode.dart';
 import '../ast_node/FunctionDeclarationNode.dart';
 import '../handle/handelExpressionStatement.dart';
-import '../handle/handleBreakStatement.dart';
-import '../handle/handleContinueStatement.dart';
-import '../handle/handleDoStatement.dart';
-import '../handle/handleExpressionFunctionBody.dart';
-import '../handle/handleForStatement.dart';
 import '../handle/handleFunctionDeclarationStatement.dart';
-import '../handle/handleIfStatement.dart';
-import '../handle/handleReturnStatement.dart';
-import '../handle/handleSwitchStatement.dart';
-import '../handle/handleTryStatement.dart';
-import '../handle/handleVariableDeclarationStatement.dart';
-import '../handle/handleWhileStatement.dart';
 
 
 class SimpleFunctionGenerator
@@ -28,8 +16,7 @@ class SimpleFunctionGenerator
 
   SimpleFunctionGenerator(
       {bool isArrowFunc = false, this.renamedParameters, this.parentClass}) {
-    func =
-        isArrowFunc ? ArrowFunctionExpressionNode() : FunctionDeclarationNode();
+    func = FunctionDeclarationNode();
   }
 
   @override
@@ -75,39 +62,12 @@ class SimpleFunctionGenerator
 
   @override
   SimpleFunctionGenerator? visitNode(AstNode node) {
+    print("MCLOG==== SimpleFunctionGenerator: ${node.runtimeType}");
     if (node is ExpressionStatement) {
       handleExpressionStatement(node, func, parentClass);
-    } else if (node is ExpressionFunctionBody) {
-      handleExpressionFunctionBody(node, func);
-    } else if (node is VariableDeclarationStatement) {
-      handleVariableDeclarationStatement(node, func);
-    } else if (node is WhileStatement) {
-      handleWhileStatement(node, func);
-    } else if (node is DoStatement) {
-      handleDoStatement(node, func);
-    } else if (node is IfStatement) {
-      handleIfStatement(node, func);
-    } else if (node is SwitchStatement) {
-      handleSwitchStatement(node, func);
-    } else if (node is ReturnStatement) {
-      handleReturnStatement(node, func);
-    } else if (node is ForStatement) {
-      handleForStatement(node, func);
-    } else if (node is ContinueStatement) {
-      handleContinueStatement(node, func);
-    } else if (node is BreakStatement) {
-      handleBreakStatement(node, func);
     } else if (node is FunctionDeclarationStatement) {
+      // 1
       handleFunctionDeclarationStatement(node, func);
-    } else if (node is TryStatement) {
-      // done 2022-10-8
-      handleTryStatement(node,func);
-    } else if (node is EmptyStatement) {
-      // done 2022-10-8 代码为 ";" 这种情况无需处理忽略即可
-    } else if (node is LabeledStatement) {
-      // todo 尚未实现
-    } else if (node is YieldStatement) {
-      // todo 尚未实现
     } else {
       return super.visitNode(node);
     }

@@ -57,7 +57,7 @@ class PropertyResolver extends ParamResolver {
 class InterpolationResolver extends ParamResolver {
   @override
   bool _checkResolver(String paramString) {
-    return RegExp(r'\$\w+', multiLine: true).hasMatch(paramString);
+    return RegExp('#\\(\\\$.+\\)', multiLine: true).hasMatch(paramString);
   }
 
   @override
@@ -66,7 +66,7 @@ class InterpolationResolver extends ParamResolver {
 
     var varNames = paramString.substring(3, paramString.length - 1);
     print("MCLOG====InterpolationResolver: $varNames");
-    var result = await FairMessageChannel().getVariable(varNames);
+    var result = await DynaChannel().getVariable(varNames);
     var value = jsonDecode(result)['result'][varNames];
     print("MCLOG====InterpolationResolver  value: $value");
 
@@ -89,7 +89,7 @@ class FunctionResolver extends ParamResolver {
       print("MCJS====FunctionResolver onPressed: $paramString");
 
       var funName = paramString.substring(2, paramString.length - 1);
-      await FairMessageChannel().invokeFunction(funName);
+      await DynaChannel().invokeFunction(funName);
       DynaManager().getState(PAGE_NAME)!.refresh();
     });
   }

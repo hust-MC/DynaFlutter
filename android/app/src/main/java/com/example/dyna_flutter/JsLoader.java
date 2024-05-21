@@ -54,58 +54,41 @@ public class JsLoader {
     }
 
     private MethodChannel.MethodCallHandler methodHandler = (call, result) -> {
-        new Handler(Looper.getMainLooper()).post(() -> {
-            Log.e("MCLOG=====", "call.method=" + call.method);
-            Log.e("MCLOG=====", "call.arguments=" + call.arguments);
+        Log.e("MCLOG=====", "call.method=" + call.method);
+        Log.e("MCLOG=====", "call.arguments=" + call.arguments);
 
-            switch (call.method) {
-                case LOAD_MAIN_JS:
-                    Log.e("MCLOG=====", "LOAD_MAIN_JS");
+        switch (call.method) {
+            case LOAD_MAIN_JS:
+                Log.e("MCLOG=====", "LOAD_MAIN_JS");
 
-                    ThreadUtils.runOnUI(new Runnable() {
-                        @Override
-                        public void run() {
-                            Log.e("MCLOG=====", "LOAD_MAIN_JS in run");
+                Log.e("MCLOG=====", "LOAD_MAIN_JS in run");
 
-                            loadMainJs(call.arguments, s -> {
-                                ThreadUtils.runOnUI(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        result.success(s);
-                                    }
-                                });
-                            });
-                        }
-                    });
-                                        result.success("successful MCMC");
+                loadMainJs(call.arguments, s -> {
+                    ThreadUtils.runOnUI(() -> result.success(s));
+                });
+                result.success("successful MCMC");
 
-                    break;
-                case RELEASE_MAIN_JS:
-                    Log.e("MCLOG=====", "RELEASE_MAIN_JS");
-
-                    ThreadUtils.run(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            Log.e("MCLOG=====", "RELEASE_MAIN_JS in run");
+                break;
+            case RELEASE_MAIN_JS:
+                Log.e("MCLOG=====", "RELEASE_MAIN_JS");
+                ThreadUtils.run(() -> {
+                    Log.e("MCLOG=====", "RELEASE_MAIN_JS in run");
 //                            releaseJsObject(call.arguments);
-                        }
-                    });
-                    result.success("successful MCMC");
+                });
+                result.success("successful MCMC");
 
-                    break;
-                case GET_VARIABLE:
-                case INVOKE_FUNCTION:
-                    Object funResult = jsExecutor.executeFunction(call.arguments);
-                    Log.e("MCLOG=====", call.method + ": funResult=" + funResult);
+                break;
+            case GET_VARIABLE:
+            case INVOKE_FUNCTION:
+                Object funResult = jsExecutor.executeFunction(call.arguments);
+                Log.e("MCLOG=====", call.method + ": funResult=" + funResult);
 
-                    result.success(funResult);
-                    break;
+                result.success(funResult);
+                break;
 
-                default:
-                    break;
-            }
-        });
+            default:
+                break;
+        }
     };
 
     public MethodChannel.MethodCallHandler getMethodHandler() {

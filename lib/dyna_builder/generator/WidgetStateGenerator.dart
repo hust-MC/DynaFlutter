@@ -13,8 +13,6 @@ import 'const.dart';
 
 
 class WidgetStateGenerator extends RecursiveAstVisitor<WidgetStateGenerator> {
-  static var FairPropsAttribute = 'FairProps';
-  static var InitPropsName = '__initProps__';
   var baseFilePath = '';
   var moduleSequence = 1;
   Map<String, String> dependencyCache = {}; // module path / module sequence
@@ -27,22 +25,15 @@ class WidgetStateGenerator extends RecursiveAstVisitor<WidgetStateGenerator> {
 
   void goThroughMembers(
       ClassDeclaration node, ClassDeclarationData tempClassDeclaration) {
-    node.members.forEach((element) {
+    for (var element in node.members) {
       if (element is FieldDeclaration) {
-        var fieldDeclaration =
-            element.fields.variables.first.toString().split('=');
-        var hasFairPropsAttribute = element.metadata
-            .any((elem) => elem.name.toString() == FairPropsAttribute);
+        var fieldDeclaration = element.fields.variables.first.toString().split('=');
         tempClassDeclaration.fields.add(FieldDeclarationData(
             fieldDeclaration[0].trim(),
             fieldDeclaration.length == 2
                 ? convertExpression(fieldDeclaration[1].trim())
-                : hasFairPropsAttribute
-                    ? InitPropsName
-                    : null));
+                : null));
       } else if (element is MethodDeclaration) {
-        // var fairWellExp = RegExp(r"@FairWell\('(.+)'\)");
-        // if (fairWellExp.allMatches(element.metadata.first.toString()).isNotEmpty) {
         var excludeMethods = ['build'];
         if (!excludeMethods.contains(element.name.toString()) &&
             element.returnType.toString() != 'Widget') {
@@ -52,9 +43,8 @@ class WidgetStateGenerator extends RecursiveAstVisitor<WidgetStateGenerator> {
               element.body is ExpressionFunctionBody)
             ..isStatic = element.isStatic);
         }
-        // }
       }
-    });
+    }
   }
 
   String findCreateStateReturn(FunctionBody body) {
@@ -93,7 +83,7 @@ class WidgetStateGenerator extends RecursiveAstVisitor<WidgetStateGenerator> {
         classDeclarationData = tempClassDeclaration;
       }
     } else if (node.extendsClause == null ||
-        node.extendsClause!.superclass.toString() == 'Object') {
+        node.extendsClause!.superclass2.toString() == 'Object') {
       allInnerDataClasses.add(tempClassDeclaration);
     }
     var fairPatchAttributeName = 'DynaBlock';
@@ -135,7 +125,6 @@ class WidgetStateGenerator extends RecursiveAstVisitor<WidgetStateGenerator> {
             goThroughMembers(node, classDeclarationData);
             break;
           default:
-            // nothing to do
             break;
         }
       }
@@ -151,10 +140,10 @@ class WidgetStateGenerator extends RecursiveAstVisitor<WidgetStateGenerator> {
 
     var dependencySequences = reserveSequence(imports.length);
     var index = 0;
-    imports.forEach((element) {
+    for (var element in imports) {
       var absPath = resolvePath(p.dirname(refererPath), element.k1);
       if (dependencyCache.containsKey(absPath)) {
-        return;
+        continue;
       }
       dependencyCache[absPath] = dependencySequences[index];
       var partJsGenerator = PartJsCodeGenerator();
@@ -190,7 +179,7 @@ class WidgetStateGenerator extends RecursiveAstVisitor<WidgetStateGenerator> {
           }, [${selfDependencySequences.join(',')}]);
           ''');
       index++;
-    });
+    }
   }
 
   List<String> reserveSequence(int num, [bool keepSequence = false]) {
@@ -209,21 +198,17 @@ class WidgetStateGenerator extends RecursiveAstVisitor<WidgetStateGenerator> {
     try {
       var partJsGenerator = PartJsCodeGenerator();
       partJsGenerator.parse(baseFilePath);
-      // parse local file dependencies
-      // import as? - supported
-      // import show / hide - not supported
-      // conditional export - not supported
       if (partJsGenerator.importLocalFiles.isNotEmpty) {
         dependencySequences =
             reserveSequence(partJsGenerator.importLocalFiles.length, true);
         var index = 0;
-        partJsGenerator.importLocalFiles.forEach((element) {
+        for (var element in partJsGenerator.importLocalFiles) {
           if (element.k3 != null && element.k3!.isNotEmpty) {
             dependencySequences[index] =
                 '[${dependencySequences[index]},\'${element.k3}\']';
           }
           index++;
-        });
+        }
         generateDependencies(
             baseFilePath, partJsGenerator.importLocalFiles, dependencyClasses);
       }
@@ -232,7 +217,7 @@ class WidgetStateGenerator extends RecursiveAstVisitor<WidgetStateGenerator> {
     }
     classDeclarationData.outputTemplateType = ClassOutputTemplateType.raw;
     return '''
-    GLOBAL['$FairKeyPlaceholder'] = (function($InitPropsName) {
+    GLOBAL['$pageName'] = (function() {
       const __global__ = this;
       ${dependencyClasses.join('\r\n')}
       return runCallback(function(__mod__) {
@@ -242,7 +227,7 @@ class WidgetStateGenerator extends RecursiveAstVisitor<WidgetStateGenerator> {
           return ${classDeclarationData.className}();
         }
       }, [${dependencySequences.join(',')}]);
-    })(convertObjectLiteralToSetOrMap(JSON.parse('#FairProps#')));
+    })();
     ''';
   }
 }

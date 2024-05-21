@@ -14,7 +14,7 @@ class FunctionDeclarationNode {
   bool classHasStaticFields = false;
   bool isStatic = false;
   FunctionBodyNode body = FunctionBodyNode();
-  static final argContext = '__arg_ctx__';
+  static const argContext = '__arg_ctx__';
 
   String argumentObj() {
     if (argumentList.isEmpty &&
@@ -95,15 +95,14 @@ class FunctionDeclarationNode {
         namedArgs = ',';
       }
       namedArgs +=
-          '''{${namedArgumentList.map((e) => e[0] + (e.length == 2 ? '=' + e[1] : '')).join(',')}}={}''';
+          '''{${namedArgumentList.map((e) => e[0] + (e.length == 2 ? '=${e[1]}' : '')).join(',')}}={}''';
     }
     var optionalArgs = '';
     if (optionalArgumentList.isNotEmpty) {
       if (namedArgumentList.isNotEmpty || argumentList.isNotEmpty) {
         optionalArgs = ',';
       }
-      optionalArgs +=
-          '''${optionalArgumentList.map((e) => e[0] + (e.length == 2 ? '=' + e[1] : '')).join(',')}''';
+      optionalArgs += optionalArgumentList.map((e) => e[0] + (e.length == 2 ? '=${e[1]}' : '')).join(',');
     }
 
     var finalBody = withContext ? wrapBodyWithCtx() : body.toSource();

@@ -9,20 +9,14 @@ import 'dart:convert';
 import 'package:dyna_flutter/dyna/dyna_widget.dart';
 import 'package:flutter/services.dart';
 
-import 'fair_utf8.dart';
-
 typedef VoidMsgCallback = void Function();
 typedef StringMsgCallback = String? Function(String? msg);
-
-// final DynamicLibrary dl = Platform.isAndroid
-//     ? DynamicLibrary.open('libfairflutter.so')
-//     : DynamicLibrary.open('FairDynamicFlutter.framework/FairDynamicFlutter');
 
 final String JS_LOADER = 'com.wuba.fair/js_loader';
 final String COMMON_MESSAGE_CHANNEL = 'com.wuba.fair/common_message_channel';
 final String BASIC_MESSAGE_CHANNEL = 'com.wuba.fair/basic_message_channel';
 
-class FairMessageChannel {
+class DynaChannel {
   // Pointer<Utf8> Function(Pointer<Utf8>) invokeJSCommonFuncSync = dl
   //     .lookup<NativeFunction<Pointer<Utf8> Function(Pointer<Utf8>)>>(
   //         'invokeJSCommonFuncSync')
@@ -32,13 +26,13 @@ class FairMessageChannel {
   MethodChannel? _methodChannel;
   MethodChannel? basicMethodChannel;
 
-  factory FairMessageChannel() {
+  factory DynaChannel() {
     return _msg;
   }
 
-  static final FairMessageChannel _msg = FairMessageChannel._internal();
+  static final DynaChannel _msg = DynaChannel._internal();
 
-  FairMessageChannel._internal() {
+  DynaChannel._internal() {
     _initMessageChannel();
   }
 
@@ -49,15 +43,6 @@ class FairMessageChannel {
 
     _commonChannel!.setMessageHandler((String? message) async {
       print('来自native端的消息：$message');
-      //js 异步调用dart中的相关方法
-      var data = json.decode(message ?? '');
-      var funcName = data['funcName']?.toString();
-
-      // if (funcName == 'invokePlugin') {
-      //   var p = await FairPluginDispatcher.dispatch(message);
-      //   return p;
-      // }
-
       _callback?.call(message);
       return 'reply from dart';
     });

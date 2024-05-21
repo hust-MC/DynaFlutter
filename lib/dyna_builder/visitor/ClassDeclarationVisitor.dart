@@ -6,7 +6,6 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 
 import '../generator/SimpleFunctionGenerator.dart';
-import '../generator/UniqueNameGenerator.dart';
 import '../generator/const.dart';
 import '../generator/helper.dart';
 import '../declaration/ClassDeclarationData.dart';
@@ -32,13 +31,10 @@ class ClassDeclarationVisitor
     }
     node.members.forEach((element) {
       if (element is FieldDeclaration) {
-        var fieldDeclaration =
-            element.fields.variables.first.toString().split('=');
+        var fieldDeclaration = element.fields.variables.first.toString().split('=');
         classDeclarationData.fields.add(FieldDeclarationData(
             fieldDeclaration[0].trim(),
-            fieldDeclaration.length == 2
-                ? convertExpression(fieldDeclaration[1].trim())
-                : null)
+            fieldDeclaration.length == 2 ? convertExpression(fieldDeclaration[1].trim()) : null)
           ..isStatic = element.isStatic);
       } else if (element is MethodDeclaration) {
         if (isDataBean && ['fromJson', 'toJson'].contains(element.name.name)) {
@@ -48,8 +44,6 @@ class ClassDeclarationVisitor
           getterList.add(element);
           return;
         }
-        // var fairWellExp = RegExp(r"@FairWell\('(.+)'\)");
-        // if (fairWellExp.allMatches(element.metadata.first.toString()).isNotEmpty) {
         var excludeMethods = ['build'];
         if (!excludeMethods.contains(element.name.name)) {
           classDeclarationData.methods.add(MethodDeclarationData(
@@ -63,7 +57,6 @@ class ClassDeclarationVisitor
         if (isDataBean && ['fromJson', 'toJson'].contains(element.name?.name)) {
           return;
         }
-        var idx = 0;
         var constructorBody = element.body.toString();
         if (element.body is EmptyFunctionBody) {
           constructorBody = '{}';
@@ -82,24 +75,6 @@ class ClassDeclarationVisitor
         } else {
           methodDeclaration.isGenerativeConstructor = element.name != null;
         }
-        element.parameters.parameters.forEach((element) {
-          if (element is FieldFormalParameter) {
-            var newParamName = UniqueNameGenerator().next();
-            methodDeclaration
-              ..renamedParameters[idx] = newParamName
-              ..abtractedInitializer
-                  .add('${element.toString()} = $newParamName;');
-          } else if (element is DefaultFormalParameter) {
-            if (element.parameter is FieldFormalParameter) {
-              var newParamName = element.parameter.identifier.toString();
-              methodDeclaration
-                ..renamedParameters[idx] = newParamName
-                ..abtractedInitializer
-                    .add('${element.parameter.toString()} = $newParamName;');
-            }
-          }
-          idx++;
-        });
         var callSuperConstructorImplicitly = false;
         element.initializers.forEach((initializer) {
           if (initializer is SuperConstructorInvocation) {

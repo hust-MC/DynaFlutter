@@ -2,8 +2,8 @@
 class Assets {
   Assets._();
 
-  static const String dynaDyna = 'assets/dyna/dyna.json';
+  static const String assetsDynaDyna = 'assets/dyna/dyna.json';
+  static const String dynaDyna = 'assets/dyna/dyna.js';
   static const String dynaDynaCore = 'assets/dyna/dyna_core.js';
-  static const String dynaMain.fair = 'assets/dyna/dyna.js';
 
 }

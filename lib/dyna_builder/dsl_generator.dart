@@ -154,8 +154,6 @@ class DslGenerator extends GeneratorForAnnotation<DynaBlock> {
   }
 
   dynamic _buildValueExpression(Expression? valueExpression) {
-    print('MCLOG==== _buildValueExpression: $valueExpression');
-
     var nameParams;
 
     if (valueExpression?.type == AstName.Identifier.name) {
@@ -192,7 +190,6 @@ class DslGenerator extends GeneratorForAnnotation<DynaBlock> {
       nameParams = '#($sourceString)';
     }
     else {
-      print('MCLOG===== _buildValueExpression else : $valueExpression');
       nameParams = _buildDsl(valueExpression);
     }
     return nameParams;

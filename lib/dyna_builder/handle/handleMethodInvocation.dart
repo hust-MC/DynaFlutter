@@ -8,9 +8,7 @@ MethodInvokeStatementNode handleMethodInvocation(
     MethodInvocation currentNode, String? parentClass) {
   var gnNode = MethodInvokeStatementNode();
   gnNode.parentClassName = parentClass;
-  gnNode.thiz = currentNode.target != null
-      ? convertExpression(currentNode.target.toString())
-      : '';
+
   gnNode.methodName = currentNode.methodName.toString();
   currentNode.argumentList.arguments.forEach((arg) {
     if (arg is NamedExpression) {
