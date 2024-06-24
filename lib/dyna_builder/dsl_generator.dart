@@ -27,7 +27,7 @@ class DslGenerator extends GeneratorForAnnotation<DynaBlock> {
 
     temp.writeAsBytesSync(await buildStep.readAsBytes(buildStep.inputId));
     var compilationUnit =
-        parseFile(path: temp.absolute.path, featureSet: FeatureSet.fromEnableFlags([])).unit;
+        parseFile(path: temp.absolute.path, featureSet: FeatureSet.latestLanguageVersion()).unit;
     var ast = compilationUnit.accept(AstVisitor());
     var encoder = const JsonEncoder.withIndent('  ');
 

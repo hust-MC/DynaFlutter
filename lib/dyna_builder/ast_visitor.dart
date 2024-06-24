@@ -3,17 +3,14 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:dyna_flutter/dyna_builder/ast_name.dart';
 
 import 'ast_key.dart';
+import 'package:_fe_analyzer_shared/src/scanner/token.dart';
 
 class AstVisitor extends SimpleAstVisitor<Map> {
   @override
   Map? visitAnnotation(Annotation node) {
     var name = node.name.accept(this);
     var argumentList = node.arguments?.accept(this);
-    return {
-      AstKey.NODE: AstName.Annotation.name,
-      AstKey.ID: name,
-      AstKey.ARGUMENT_LIST: argumentList
-    };
+    return {AstKey.NODE: AstName.Annotation.name, AstKey.ID: name, AstKey.ARGUMENT_LIST: argumentList};
   }
 
   @override
@@ -67,7 +64,8 @@ class AstVisitor extends SimpleAstVisitor<Map> {
   /// 变量声明
   @override
   Map? visitVariableDeclaration(VariableDeclaration node) {
-    var id = node.name.accept(this);
+    print("MCTOKEN==== visitVariableDeclaration ${node.name}");
+    var id = node.name.accept();
     var init = node.initializer?.accept(this);
     return {
       AstKey.NODE: AstName.VariableDeclaration.name,
@@ -103,7 +101,9 @@ class AstVisitor extends SimpleAstVisitor<Map> {
   /// 函数声明
   @override
   Map? visitFunctionDeclaration(FunctionDeclaration node) {
-    var id = node.name.accept(this);
+    print("MCTOKEN==== visitFunctionDeclaration ${node.name.lexeme}");
+
+    var id = node.name.accept();
     var expression = node.functionExpression.accept(this);
 
     return {
@@ -137,7 +137,9 @@ class AstVisitor extends SimpleAstVisitor<Map> {
   ///方法声明
   @override
   Map? visitMethodDeclaration(MethodDeclaration node) {
-    var id = node.name.accept(this);
+    print("MCTOKEN==== visitMethodDeclaration ${node.name}");
+
+    var id = node.name.accept();
     var parameters = node.parameters?.accept(this);
     var typeParameters = node.typeParameters?.accept(this);
     var body = node.body.accept(this);
@@ -198,7 +200,7 @@ class AstVisitor extends SimpleAstVisitor<Map> {
   Map? visitClassDeclaration(ClassDeclaration node) {
     print("MCLOG====visitClassDeclaration: ${node.name}");
 
-    var id = node.name.accept(this);
+    var id = node.name.accept();
     var extendsClause = node.extendsClause?.accept(this);
     var implementsClause = node.implementsClause?.accept(this);
     var withClause = node.withClause?.accept(this);
@@ -227,15 +229,12 @@ class AstVisitor extends SimpleAstVisitor<Map> {
 
   @override
   Map? visitImplementsClause(ImplementsClause node) {
-    return {
-      AstKey.NODE: AstKey.IMPLEMENTS_CLAUSE,
-      AstKey.IMPLEMENTS: accept(node.interfaces2, this)
-    };
+    return {AstKey.NODE: AstKey.IMPLEMENTS_CLAUSE, AstKey.IMPLEMENTS: accept(node.interfaces, this)};
   }
 
   @override
   Map? visitExtendsClause(ExtendsClause node) {
-    return node.superclass2.accept(this);
+    return node.superclass.accept(this);
   }
 
   @override
@@ -250,22 +249,16 @@ class AstVisitor extends SimpleAstVisitor<Map> {
 
   @override
   Map? visitArgumentList(ArgumentList node) {
-    return {
-      AstKey.NODE: AstName.ArgumentList.name,
-      AstKey.ARGUMENT_LIST: accept(node.arguments, this)
-    };
+    return {AstKey.NODE: AstName.ArgumentList.name, AstKey.ARGUMENT_LIST: accept(node.arguments, this)};
   }
 
   @override
   Map? visitSimpleFormalParameter(SimpleFormalParameter node) {
     var type = node.type?.accept(this);
-    var name = node.identifier?.name;
+    var name = node.name?.lexeme;
+    print("MCLOG====visitSimpleFormalParameter: ${node.name}");
 
-    return {
-      AstKey.NODE: AstName.SimpleFormalParameter.name,
-      AstKey.PARAM_TYPE: type,
-      AstKey.NAME: name
-    };
+    return {AstKey.NODE: AstName.SimpleFormalParameter.name, AstKey.PARAM_TYPE: type, AstKey.NAME: name};
   }
 
   /// 返回数据定义
@@ -284,6 +277,7 @@ class AstVisitor extends SimpleAstVisitor<Map> {
   Map? visitExpressionStatement(ExpressionStatement node) {
     return node.expression.accept(this);
   }
+
   @override
   Map? visitVariableDeclarationStatement(VariableDeclarationStatement node) {
     return node.variables.accept(this);
@@ -307,25 +301,16 @@ class AstVisitor extends SimpleAstVisitor<Map> {
 
   /// 函数参数类型
   @override
-  Map? visitTypeName(NamedType node) {
-    var name = node.name.name;
+  Map? visitNamedType(NamedType node) {
+    var name = node.name2.lexeme;
     return {AstKey.NODE: AstName.NamedType.name, AstKey.NAME: name};
   }
 
   @override
   Map? visitInstanceCreationExpression(InstanceCreationExpression node) {
     Map? callee;
-    if (node.constructorName.type2.name is PrefixedIdentifier) {
-      var prefixedIdentifier = node.constructorName.type2.name as PrefixedIdentifier;
-      callee = {
-        AstKey.NODE: AstName.MemberExpression.name,
-        AstKey.OBJECT: prefixedIdentifier.prefix.accept(this),
-        AstKey.PROPERTY: prefixedIdentifier.identifier.accept(this),
-      };
-    } else {
-      //如果不是simpleIdentif 需要特殊处理
-      callee = node.constructorName.type2.name.accept(this);
-    }
+    callee = node.constructorName.type.name2.accept();
+
     var argumentList = node.argumentList.accept(this);
     return {
       AstKey.NODE: AstName.MethodInvocation.name,
@@ -338,10 +323,8 @@ class AstVisitor extends SimpleAstVisitor<Map> {
   @override
   Map? visitIntegerLiteral(IntegerLiteral node) {
     if (node.literal.lexeme.toUpperCase().startsWith('0X')) {
-      print("MCLOG=== astVisitor  visitIntegerLiteral 0x: ${node.literal.lexeme}");
       return {AstKey.NODE: AstName.StringLiteral.name, 'value': node.literal.lexeme};
     } else {
-      print("MCLOG=== astVisitor  visitIntegerLiteral: ${node.value}");
       return {AstKey.NODE: AstName.NumericLiteral.name, 'value': node.value};
     }
   }
@@ -375,10 +358,7 @@ class AstVisitor extends SimpleAstVisitor<Map> {
 
   @override
   Map? visitInterpolationExpression(InterpolationExpression node) {
-    return {
-      AstKey.NODE: AstName.InterpolationExpression.name,
-      AstKey.EXPRESSION: node.expression.accept(this)
-    };
+    return {AstKey.NODE: AstName.InterpolationExpression.name, AstKey.EXPRESSION: node.expression.accept(this)};
   }
 
   @override
@@ -416,5 +396,11 @@ class AstVisitor extends SimpleAstVisitor<Map> {
       }
     }
     return list;
+  }
+}
+
+extension TokenExtension on Token {
+  Map accept() {
+    return {AstKey.NODE: AstName.Identifier.name, AstKey.NAME: lexeme};
   }
 }

@@ -45,7 +45,7 @@ Future dart2JS(String input, String jsName) async {
 
 Future<String> convertFile(String filePath) async {
   var stateFilePath = normalize(filePath);
-  var result = parseFile(path: stateFilePath, featureSet: FeatureSet.fromEnableFlags([]));
+  var result = parseFile(path: stateFilePath, featureSet: FeatureSet.latestLanguageVersion());
   var visitor = WidgetStateGenerator(stateFilePath);
   result.unit.visitChildren(visitor);
 
