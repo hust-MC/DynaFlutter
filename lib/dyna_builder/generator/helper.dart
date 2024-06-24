@@ -10,7 +10,7 @@ String convertExpression(String code) {
   var res = '';
   var start = 0;
   try {
-    res = convertStatements(code + ';');
+    res = convertStatements('$code;');
     res = res.trim();
   } on ArgumentError {
     // 有些表达式直接变成语句会报错，例如字典字面量对象
@@ -28,9 +28,6 @@ String convertExpression(String code) {
 
 
 String convertStatements(String code) {
-  if (!code.endsWith(';') && !code.endsWith('}')) {
-    code += ';';
-  }
   var res = convertBlock('''{$code}''');
   return res;
 }

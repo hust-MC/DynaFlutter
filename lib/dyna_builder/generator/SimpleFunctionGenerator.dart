@@ -5,8 +5,6 @@ import 'package:analyzer/dart/ast/visitor.dart';
 
 import '../ast_node/FunctionDeclarationNode.dart';
 import '../handle/handelExpressionStatement.dart';
-import '../handle/handleFunctionDeclarationStatement.dart';
-
 
 class SimpleFunctionGenerator
     extends GeneralizingAstVisitor<SimpleFunctionGenerator> {
@@ -26,35 +24,6 @@ class SimpleFunctionGenerator
   }
 
   @override
-  SimpleFunctionGenerator? visitFormalParameterList(FormalParameterList node) {
-    var idx = 0;
-    node.parameters.forEach((param) {
-      var ident = param.identifier.toString();
-      if (renamedParameters != null && renamedParameters!.containsKey(idx)) {
-        ident = renamedParameters![idx]!;
-      }
-      var arg = [ident];
-
-      if (param.isNamed) {
-        if (param is DefaultFormalParameter && (param.defaultValue != null)) {
-          arg.add(param.defaultValue.toString());
-        }
-        func?.namedArgumentList.add(arg);
-      } else if (param.isOptional) {
-        if (param is DefaultFormalParameter && (param.defaultValue != null)) {
-          arg.add(param.defaultValue.toString());
-        }
-        func?.optionalArgumentList.add(arg);
-      } else {
-        func?.argumentList.add(arg);
-      }
-
-      idx++;
-    });
-    return null;
-  }
-
-  @override
   SimpleFunctionGenerator? visitBlockFunctionBody(BlockFunctionBody node) {
     func?.isAsync = node.isAsynchronous;
     return super.visitBlockFunctionBody(node);
@@ -71,5 +40,6 @@ class SimpleFunctionGenerator
     } else {
       return super.visitNode(node);
     }
+    return null;
   }
 }

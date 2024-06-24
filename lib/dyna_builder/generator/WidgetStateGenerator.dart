@@ -2,15 +2,10 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:dyna_flutter/dyna_builder/generator/helper.dart';
 
-import 'package:path/path.dart' as p;
-
 import '../declaration/ClassDeclarationData.dart';
 import '../declaration/FieldDeclarationData.dart';
 import '../declaration/MethodDeclarationData.dart';
-import '../visitor/ClassDeclarationVisitor.dart';
-import 'PartJsCodeGenerator.dart';
 import 'const.dart';
-
 
 class WidgetStateGenerator extends RecursiveAstVisitor<WidgetStateGenerator> {
   var baseFilePath = '';
@@ -30,13 +25,9 @@ class WidgetStateGenerator extends RecursiveAstVisitor<WidgetStateGenerator> {
         var fieldDeclaration = element.fields.variables.first.toString().split('=');
         tempClassDeclaration.fields.add(FieldDeclarationData(
             fieldDeclaration[0].trim(),
-            fieldDeclaration.length == 2
-                ? convertExpression(fieldDeclaration[1].trim())
-                : null));
+            fieldDeclaration.length == 2 ? convertExpression(fieldDeclaration[1].trim()) : null));
       } else if (element is MethodDeclaration) {
-        var excludeMethods = ['build'];
-        if (!excludeMethods.contains(element.name.toString()) &&
-            element.returnType.toString() != 'Widget') {
+        if ('build' != element.name.toString() && element.returnType.toString() != 'Widget') {
           tempClassDeclaration.methods.add(MethodDeclarationData(
               element.name.toString(),
               element.toString(),
@@ -49,17 +40,13 @@ class WidgetStateGenerator extends RecursiveAstVisitor<WidgetStateGenerator> {
 
   String findCreateStateReturn(FunctionBody body) {
     if (body is BlockFunctionBody) {
-      ReturnStatement? returnStatement = body.block.statements
-          .singleWhereOrNull((element) => element is ReturnStatement,
-              orElse: () => null) as ReturnStatement?;
-      assert(returnStatement != null,
-          'too complicated createState implementation');
-      assert(returnStatement?.expression is MethodInvocation,
-          'too complicated return expression in method createState');
+      ReturnStatement? returnStatement = body.block.statements.singleWhereOrNull(
+              (element) => element is ReturnStatement, orElse: () => null) as ReturnStatement?;
+      assert(returnStatement != null, 'too complicated createState implementation');
+      assert(returnStatement?.expression is MethodInvocation, 'too complicated return expression in method createState');
       return (returnStatement?.expression as MethodInvocation).methodName.name;
     } else if (body is ExpressionFunctionBody) {
-      assert(body.expression is MethodInvocation,
-          'too complicated return expression in method createState');
+      assert(body.expression is MethodInvocation, 'too complicated return expression in method createState');
       return (body.expression as MethodInvocation).methodName.name;
     } else {
       throw 'Unsupported body in method createState';
@@ -71,40 +58,30 @@ class WidgetStateGenerator extends RecursiveAstVisitor<WidgetStateGenerator> {
     var stateExp = RegExp(r'^State(<.+>)?$');
 
     var tempClassDeclaration = ClassDeclarationData();
-    tempClassDeclaration.className = node.name.name;
+    print("MCTOKEN=== visitClassDeclaration: ${node.name}");
+    tempClassDeclaration.className = "node.name.name";
+    // 检索所有的方法和字段
     goThroughMembers(node, tempClassDeclaration);
-    if (node.extendsClause != null &&
-        stateExp
-            .allMatches(node.extendsClause!.superclass.toString())
-            .isNotEmpty) {
+    if (node.extendsClause != null && stateExp.allMatches(node.extendsClause!.superclass.toString()).isNotEmpty) {
+      // 针对State子类进行处理
       allStates.add(tempClassDeclaration);
-      if (classDeclarationData.className != null &&
-          classDeclarationData.className == tempClassDeclaration.className) {
+      if (classDeclarationData.className != null && classDeclarationData.className == tempClassDeclaration.className) {
         classDeclarationData = tempClassDeclaration;
       }
-    } else if (node.extendsClause == null ||
-        node.extendsClause!.superclass2.toString() == 'Object') {
-      allInnerDataClasses.add(tempClassDeclaration);
     }
-    var fairPatchAttributeName = 'DynaBlock';
+    var annotationName = 'DynaBlock';
     const statefulWidgetClassName = 'StatefulWidget';
     const statelessWidgetClassName = 'StatelessWidget';
-    if (node.metadata.isNotEmpty &&
-        node.metadata
-            .any((item) => item.name.toString() == fairPatchAttributeName)) {
+    if (node.metadata.isNotEmpty && node.metadata.any((item) => item.name.toString() == annotationName)) {
       if (node.extendsClause != null) {
         switch (node.extendsClause!.superclass.toString()) {
           case statefulWidgetClassName:
             var member = node.members.firstWhereOrNull(
-                (element) =>
-                    element is MethodDeclaration &&
-                    element.name.toString() == 'createState',
+                (element) => element is MethodDeclaration && element.name.toString() == 'createState',
                 orElse: () => null);
-            if (member != null) {
-              var expectedStateClassName =
-                  ((member as MethodDeclaration).returnType as TypeName)
-                      .name
-                      .name;
+            if (member  != null) {
+              print("MCTOKEN==== visitClassDeclaration2 : ${((member as MethodDeclaration).returnType as NamedType).name2}");
+              var expectedStateClassName = "((member as MethodDeclaration).returnType as NamedType).name2.name";
               if (expectedStateClassName == 'State') {
                 expectedStateClassName = findCreateStateReturn(member.body);
               }
@@ -114,6 +91,7 @@ class WidgetStateGenerator extends RecursiveAstVisitor<WidgetStateGenerator> {
               if (data != null) {
                 classDeclarationData = data;
               } else {
+                // 找到目标类：带@DynaBlock，并返回State<>的类
                 classDeclarationData.className = expectedStateClassName;
               }
             } else {
@@ -121,7 +99,8 @@ class WidgetStateGenerator extends RecursiveAstVisitor<WidgetStateGenerator> {
             }
             break;
           case statelessWidgetClassName:
-            classDeclarationData.className = node.name.name;
+            print("MCTOKEN=== visitClassDeclaration3: ${ node.name}");
+            classDeclarationData.className = "node.name.name";
             goThroughMembers(node, classDeclarationData);
             break;
           default:
@@ -132,60 +111,9 @@ class WidgetStateGenerator extends RecursiveAstVisitor<WidgetStateGenerator> {
     return null;
   }
 
-  void generateDependencies(String refererPath,
-      List<Tuple<String, bool, String>> imports, List<String> result) {
-    if (imports.isEmpty) {
-      return;
-    }
-
-    var dependencySequences = reserveSequence(imports.length);
-    var index = 0;
-    for (var element in imports) {
-      var absPath = resolvePath(p.dirname(refererPath), element.k1);
-      if (dependencyCache.containsKey(absPath)) {
-        continue;
-      }
-      dependencyCache[absPath] = dependencySequences[index];
-      var partJsGenerator = PartJsCodeGenerator();
-      partJsGenerator.parse(absPath);
-      var selfDependencySequences = <String>[];
-      if (partJsGenerator.importLocalFiles.isNotEmpty) {
-        generateDependencies(absPath, partJsGenerator.importLocalFiles, result);
-        selfDependencySequences =
-            reserveSequence(partJsGenerator.importLocalFiles.length, true);
-        var index1 = 0;
-        partJsGenerator.importLocalFiles.forEach((element) {
-          var tempDependencyPath = resolvePath(p.dirname(absPath), element.k1);
-          if (dependencyCache.containsKey(tempDependencyPath)) {
-            selfDependencySequences[index1] =
-                dependencyCache[tempDependencyPath].toString();
-          }
-          if (element.k3 != null && element.k3!.isNotEmpty) {
-            selfDependencySequences[index1] =
-                '[${selfDependencySequences[index1]},\'${element.k3}\']';
-          }
-          index1++;
-        });
-      }
-      var classDeclarationVisitor1 =
-          ClassDeclarationVisitor(element.k2 ?? false);
-      classDeclarationVisitor1.parseByFile(absPath);
-      result.add('''
-          defineModule(${dependencySequences[index]}, function(__mod__) {
-            with (__mod__.imports) {
-              ${classDeclarationVisitor1.genJsCode()}
-            }
-            ${classDeclarationVisitor1.classes.map((e) => '__mod__.exports.${e.className} = ${e.className};').join('\r\n')}
-          }, [${selfDependencySequences.join(',')}]);
-          ''');
-      index++;
-    }
-  }
-
   List<String> reserveSequence(int num, [bool keepSequence = false]) {
-    var result = new List<int>.generate(num, (index) => moduleSequence + index)
-        .map((item) => item.toString())
-        .toList();
+    var result = List<int>.generate(num, (index) => moduleSequence + index)
+        .map((item) => item.toString()).toList();
     if (!keepSequence) {
       moduleSequence += num;
     }
@@ -193,40 +121,15 @@ class WidgetStateGenerator extends RecursiveAstVisitor<WidgetStateGenerator> {
   }
 
   String genJsCode() {
-    var dependencySequences = <String>[];
-    var dependencyClasses = <String>[];
-    try {
-      var partJsGenerator = PartJsCodeGenerator();
-      partJsGenerator.parse(baseFilePath);
-      if (partJsGenerator.importLocalFiles.isNotEmpty) {
-        dependencySequences =
-            reserveSequence(partJsGenerator.importLocalFiles.length, true);
-        var index = 0;
-        for (var element in partJsGenerator.importLocalFiles) {
-          if (element.k3 != null && element.k3!.isNotEmpty) {
-            dependencySequences[index] =
-                '[${dependencySequences[index]},\'${element.k3}\']';
-          }
-          index++;
-        }
-        generateDependencies(
-            baseFilePath, partJsGenerator.importLocalFiles, dependencyClasses);
-      }
-    } catch (exception) {
-      print(exception);
-    }
-    classDeclarationData.outputTemplateType = ClassOutputTemplateType.raw;
     return '''
     GLOBAL['$pageName'] = (function() {
       const __global__ = this;
-      ${dependencyClasses.join('\r\n')}
       return runCallback(function(__mod__) {
         with(__mod__.imports) {
-          ${allInnerDataClasses.map((e) => e.genJsCode()).join('\r\n')}
           ${classDeclarationData.genJsCode()};
           return ${classDeclarationData.className}();
         }
-      }, [${dependencySequences.join(',')}]);
+      }, []);
     })();
     ''';
   }

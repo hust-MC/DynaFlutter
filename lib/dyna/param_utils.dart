@@ -7,12 +7,4 @@ class ParamUtils {
     result.nameParam = name ?? result.nameParam;
     return result;
   }
-
-  static List<T> listAs<T>(List? list) {
-    if (list == null || list.isEmpty) {
-      return [];
-    }
-
-    return list.map((e) => e as T).toList();
-  }
 }

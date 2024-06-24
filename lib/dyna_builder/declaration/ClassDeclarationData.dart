@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:dyna_flutter/dyna_builder/generator/helper.dart';
 
 import '../generator/const.dart';
@@ -10,7 +8,6 @@ class ClassDeclarationData {
   String? className = '';
   var fields = <FieldDeclarationData>[];
   var methods = <MethodDeclarationData>[];
-  var outputTemplateType = ClassOutputTemplateType.raw;
   String? parentClass = '';
   bool isDataBean = false;
 
@@ -19,28 +16,25 @@ class ClassDeclarationData {
 
   String genJsCode() {
     var tpl = '';
-    switch (outputTemplateType) {
-      case ClassOutputTemplateType.raw:
-        {
-          init();
-          var fieldsLiterval = parseFields(fields);
-          var memberMethodsLiterval = parseMemberMethods(methods);
-          var staticFieldsLiteral = parseStaticFields(fields);
-          var staticMethodsLiteral = parseStaticMethods(methods);
-          var defaultConstructor = parseDefaultConstructor();
-          var instanceConstruction = parseInstanceConstruction();
-          var beanToJson = parseBeanToJson();
-          var beanFromJson = parseBeanFromJson();
-          tpl = '''
+    init();
+    var fieldsLiteral = parseFields(fields);
+    var memberMethodsLiteral = parseMemberMethods(methods);
+    var staticFieldsLiteral = parseStaticFields(fields);
+    var staticMethodsLiteral = parseStaticMethods(methods);
+    var defaultConstructor = parseDefaultConstructor();
+    var instanceConstruction = parseInstanceConstruction();
+    var beanToJson = parseBeanToJson();
+    var beanFromJson = parseBeanFromJson();
+    tpl = '''
         function $className() {          
           $instanceConstruction
         }
         $className.$innerName = function inner() {
           ${parentClass != null && parentClass!.isNotEmpty ? '$parentClass.$innerName.call(this);' : ''}
-          $fieldsLiterval
+          $fieldsLiteral
         };
         $className.prototype = {
-          $memberMethodsLiterval
+          $memberMethodsLiteral
           ${isDataBean ? beanToJson : ''}
         };
         ${isAutoGenDefaultConstructor ? defaultConstructor : ''}
@@ -49,43 +43,18 @@ class ClassDeclarationData {
         ${isDataBean ? beanFromJson : ''}
         ${parentClass != null && parentClass!.isNotEmpty ? 'inherit($className, $parentClass);' : ''}
         ''';
-        }
-        break;
-      case ClassOutputTemplateType.pageState:
-        {
-          var fieldsLiterval = '';
-          fields.forEach((element) {
-            fieldsLiterval += '${element.name}: ${element.initVal},';
-          });
-          var methodsLiterval = '';
-          methods.forEach((element) {
-            methodsLiterval +=
-                '${element.name}: ${convertFunctionFromData(element, this)},';
-          });
-          tpl = '''
-        {
-          $fieldsLiterval
-          $methodsLiterval
-        }
-        ''';
-        }
 
-        break;
-    }
     return tpl;
   }
 
   init() {
     isFactoryDefaultContructor = methods.firstWhereOrNull(
-            (element) =>
-                element.isFactory == true &&
-                element.name == factoryConstructorAlias,
+            (element) => element.isFactory == true && element.name == factoryConstructorAlias,
             orElse: () => null) !=
         null;
 
-    isAutoGenDefaultConstructor = methods.firstWhereOrNull(
-            (element) => !element.isStatic && element.name == constructorAlias,
-            orElse: () => null) ==
+    isAutoGenDefaultConstructor = methods
+            .firstWhereOrNull((element) => !element.isStatic && element.name == constructorAlias, orElse: () => null) ==
         null;
   }
 
@@ -103,24 +72,24 @@ class ClassDeclarationData {
   }
 
   parseFields(List<FieldDeclarationData> fields) {
-    var fieldsLiterval = '';
+    var fieldsLiteral = '';
     fields.where((element) => !element.isStatic).forEach((element) {
-      if(element.isGetter){
-        fieldsLiterval += 'this.${element.name} = (function(_this) { with (_this) {${element.initVal ?? 'null'} } })(this);';
-      }else{
-          fieldsLiterval += 'this.${element.name} = ${element.initVal};';
+      if (element.isGetter) {
+        fieldsLiteral +=
+            'this.${element.name} = (function(_this) { with (_this) {${element.initVal ?? 'null'} } })(this);';
+      } else {
+        fieldsLiteral += 'this.${element.name} = ${element.initVal};';
       }
     });
-    return fieldsLiterval;
+    return fieldsLiteral;
   }
 
   parseMemberMethods(List<MethodDeclarationData> methods) {
-    var memberMethodsLiterval = '';
+    var memberMethodsLiteral = '';
     methods.where((element) => !(element.isStatic)).forEach((element) {
-      memberMethodsLiterval +=
-          '${element.name}: ${convertFunctionFromData(element, this)},';
+      memberMethodsLiteral += '${element.name}: ${convertFunctionFromData(element, this)},';
     });
-    return memberMethodsLiterval;
+    return memberMethodsLiteral;
   }
 
   parseStaticFields(List<FieldDeclarationData> fields) {
@@ -136,8 +105,7 @@ class ClassDeclarationData {
   parseStaticMethods(List<MethodDeclarationData> methods) {
     var staticMethodsLiteral = methods
         .where((element) => element.isStatic)
-        .map((e) =>
-            '$className.${e.name} = ${convertFunctionFromData(e, this)};')
+        .map((e) => '$className.${e.name} = ${convertFunctionFromData(e, this)};')
         .join('\r\n');
     return staticMethodsLiteral;
   }
@@ -185,5 +153,4 @@ class ClassDeclarationData {
         ''';
     return beanFromJson;
   }
-
 }

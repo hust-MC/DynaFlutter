@@ -28,15 +28,6 @@ int _kDefaultSemanticIndexCallback(Widget _, int localIndex) => localIndex;
 const double kMiddleSpacing = 16.0;
 
 Map<String, Object Function(Params)> widgetMap = {
-  'Text': (Params params) => Text(params.posParam[0]),
-  'Column': (Params params) =>
-      Column(children: ParamUtils.listAs<Widget>(params.nameParam['children'])),
-  'Image': (Params params) => Image(image: params.posParam[0]),
-  'Scaffold': (Params params) =>
-      Scaffold(appBar: params.nameParam['appBar'], body: params.nameParam['body'], floatingActionButton: params.nameParam['floatingActionButton']),
-  'AppBar': (Params params) => AppBar(title: params.nameParam['title']),
-  'Center': (Params params) => Center(child: params.nameParam['child']),
-  'Icon': (Params params) => Icon(params.posParam[0]),
   'AboutDialog': (Params params) => AboutDialog(
     key: params.nameParam['key'],
     applicationName: params.nameParam['applicationName'],

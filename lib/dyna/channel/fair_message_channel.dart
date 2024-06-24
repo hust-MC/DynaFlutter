@@ -12,19 +12,15 @@ import 'package:flutter/services.dart';
 typedef VoidMsgCallback = void Function();
 typedef StringMsgCallback = String? Function(String? msg);
 
-final String JS_LOADER = 'com.wuba.fair/js_loader';
-final String COMMON_MESSAGE_CHANNEL = 'com.wuba.fair/common_message_channel';
-final String BASIC_MESSAGE_CHANNEL = 'com.wuba.fair/basic_message_channel';
+const jsLoader = 'com.wuba.fair/js_loader';
+const commonMessageChannel = 'com.wuba.fair/common_message_channel';
+const basicMessageChannel = 'com.wuba.fair/basic_message_channel';
 
 class DynaChannel {
-  // Pointer<Utf8> Function(Pointer<Utf8>) invokeJSCommonFuncSync = dl
-  //     .lookup<NativeFunction<Pointer<Utf8> Function(Pointer<Utf8>)>>(
-  //         'invokeJSCommonFuncSync')
-  //     .asFunction();
 
-  BasicMessageChannel<String?>? _commonChannel;
-  MethodChannel? _methodChannel;
-  MethodChannel? basicMethodChannel;
+  final BasicMessageChannel<String?> _commonChannel = const BasicMessageChannel<String?>(commonMessageChannel, StringCodec());
+  final MethodChannel _methodChannel = const MethodChannel(jsLoader);
+  final MethodChannel basicMethodChannel = const MethodChannel(basicMessageChannel);
 
   factory DynaChannel() {
     return _msg;
@@ -37,17 +33,13 @@ class DynaChannel {
   }
 
   void _initMessageChannel() {
-    _commonChannel ??= BasicMessageChannel<String?>(COMMON_MESSAGE_CHANNEL, StringCodec());
-    _methodChannel ??= MethodChannel(JS_LOADER);
-    basicMethodChannel ??= MethodChannel(BASIC_MESSAGE_CHANNEL);
-
-    _commonChannel!.setMessageHandler((String? message) async {
+    _commonChannel.setMessageHandler((String? message) async {
       print('来自native端的消息：$message');
       _callback?.call(message);
       return 'reply from dart';
     });
 
-    _methodChannel!.setMethodCallHandler((call) async {});
+    _methodChannel.setMethodCallHandler((call) async {});
   }
 
   StringMsgCallback? _callback;
@@ -57,11 +49,11 @@ class DynaChannel {
   }
 
   Future<dynamic> loadJS(String args, StringMsgCallback? callback) {
-    return _methodChannel!.invokeMethod('loadMainJs', args);
+    return _methodChannel.invokeMethod('loadMainJs', args);
   }
 
   Future<dynamic> release(String args, VoidMsgCallback? callback) {
-    return _methodChannel!.invokeMethod('releaseMainJs', args);
+    return _methodChannel.invokeMethod('releaseMainJs', args);
   }
 
   Future<String> getVariable(String variable) async {
@@ -70,7 +62,7 @@ class DynaChannel {
       'type': 'variable',
       'args': {variable: ''}
     };
-    return (await _methodChannel!.invokeMethod('getVariable', jsonEncode(arguments))).toString();
+    return (await _methodChannel.invokeMethod('getVariable', jsonEncode(arguments))).toString();
   }
 
   Future<dynamic> invokeFunction(String funName) async {
@@ -81,11 +73,11 @@ class DynaChannel {
         'funcName': funName
       }
     };
-    return await _methodChannel!.invokeMethod('invokeFunction', jsonEncode(arguments));
+    return await _methodChannel.invokeMethod('invokeFunction', jsonEncode(arguments));
   }
 
   Future<String?> sendCommonMessage(dynamic msg) async {
-    return _commonChannel!.send(msg);
+    return _commonChannel.send(msg);
   }
 
   dynamic sendCommonMessageSync(dynamic msg) => "OKOK MC";
